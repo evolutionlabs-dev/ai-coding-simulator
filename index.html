@@ -2,26 +2,115 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>AI-Assisted Development Simulator</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>AI-Assisted Development Simulator | Evolution Labs</title>
     <link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;600&family=Inter:wght@400;600&display=swap" rel="stylesheet">
     <style>
-        * {
-            margin: 0;
-            padding: 0;
-            box-sizing: border-box;
+        /* ═══════════════════════════════════════
+           THEME SYSTEM (CSS Custom Properties)
+           ═══════════════════════════════════════ */
+        :root, [data-theme="green"] {
+            --primary: #4ade80;
+            --primary-rgb: 74, 222, 128;
+            --primary-dim: rgba(74, 222, 128, 0.3);
+            --primary-glow: rgba(74, 222, 128, 0.5);
+            --primary-bg: rgba(74, 222, 128, 0.03);
+            --primary-border: rgba(74, 222, 128, 0.3);
+            --primary-hover: rgba(74, 222, 128, 0.6);
+            --bg: #0a0a0f;
+            --bg-panel: rgba(10, 10, 15, 0.95);
+            --kw-color: #f472b6;
+            --fn-color: #60a5fa;
+            --st-color: #86efac;
+            --cm-color: #6b7280;
+            --vr-color: #fbbf24;
+            --op-color: #4ade80;
+        }
+        [data-theme="purple"] {
+            --primary: #a855f7;
+            --primary-rgb: 168, 85, 247;
+            --primary-dim: rgba(168, 85, 247, 0.3);
+            --primary-glow: rgba(168, 85, 247, 0.5);
+            --primary-bg: rgba(168, 85, 247, 0.03);
+            --primary-border: rgba(168, 85, 247, 0.3);
+            --primary-hover: rgba(168, 85, 247, 0.6);
+            --bg: #0a0a0f;
+            --bg-panel: rgba(10, 10, 15, 0.95);
+            --kw-color: #f472b6;
+            --fn-color: #818cf8;
+            --st-color: #c4b5fd;
+            --cm-color: #6b7280;
+            --vr-color: #fbbf24;
+            --op-color: #a855f7;
+        }
+        [data-theme="blue"] {
+            --primary: #3b82f6;
+            --primary-rgb: 59, 130, 246;
+            --primary-dim: rgba(59, 130, 246, 0.3);
+            --primary-glow: rgba(59, 130, 246, 0.5);
+            --primary-bg: rgba(59, 130, 246, 0.03);
+            --primary-border: rgba(59, 130, 246, 0.3);
+            --primary-hover: rgba(59, 130, 246, 0.6);
+            --bg: #0a0a0f;
+            --bg-panel: rgba(10, 10, 15, 0.95);
+            --kw-color: #f472b6;
+            --fn-color: #22d3ee;
+            --st-color: #93c5fd;
+            --cm-color: #6b7280;
+            --vr-color: #fbbf24;
+            --op-color: #3b82f6;
+        }
+        [data-theme="amber"] {
+            --primary: #f59e0b;
+            --primary-rgb: 245, 158, 11;
+            --primary-dim: rgba(245, 158, 11, 0.3);
+            --primary-glow: rgba(245, 158, 11, 0.5);
+            --primary-bg: rgba(245, 158, 11, 0.03);
+            --primary-border: rgba(245, 158, 11, 0.3);
+            --primary-hover: rgba(245, 158, 11, 0.6);
+            --bg: #0a0a0f;
+            --bg-panel: rgba(10, 10, 15, 0.95);
+            --kw-color: #ef4444;
+            --fn-color: #fb923c;
+            --st-color: #fde68a;
+            --cm-color: #6b7280;
+            --vr-color: #a78bfa;
+            --op-color: #f59e0b;
+        }
+        [data-theme="evolution"] {
+            --primary: #00d4aa;
+            --primary-rgb: 0, 212, 170;
+            --primary-dim: rgba(0, 212, 170, 0.3);
+            --primary-glow: rgba(0, 212, 170, 0.5);
+            --primary-bg: rgba(0, 212, 170, 0.03);
+            --primary-border: rgba(0, 212, 170, 0.3);
+            --primary-hover: rgba(0, 212, 170, 0.6);
+            --bg: #070b10;
+            --bg-panel: rgba(7, 11, 16, 0.95);
+            --kw-color: #ff6b9d;
+            --fn-color: #45b7d1;
+            --st-color: #7dcea0;
+            --cm-color: #6b7280;
+            --vr-color: #f7dc6f;
+            --op-color: #00d4aa;
         }
 
+        /* ═══════════════════════════════════════
+           RESET & BASE
+           ═══════════════════════════════════════ */
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+
         body {
-            background: #0a0a0f;
-            color: #4ade80;
+            background: var(--bg);
+            color: var(--primary);
             font-family: 'JetBrains Mono', monospace;
             overflow: hidden;
             height: 100vh;
+            height: 100dvh;
             position: relative;
+            transition: background 0.5s ease, color 0.5s ease;
         }
 
-        /* Watermark */
         body::before {
             content: 'evolutionlabs.dev';
             position: fixed;
@@ -35,24 +124,37 @@
             letter-spacing: 2px;
         }
 
+        /* ═══════════════════════════════════════
+           MATRIX RAIN CANVAS (FIXED z-index)
+           ═══════════════════════════════════════ */
+        #matrixCanvas {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            pointer-events: none;
+            z-index: 1;
+            opacity: 0;
+            transition: opacity 0.5s ease;
+        }
+        #matrixCanvas.active { opacity: 1; }
+
+        /* ═══════════════════════════════════════
+           CONTAINER
+           ═══════════════════════════════════════ */
         .container {
             display: flex;
             flex-direction: column;
             height: 100vh;
-            padding: 20px;
-            gap: 15px;
-            background:
-                repeating-linear-gradient(
-                    0deg,
-                    rgba(74, 222, 128, 0.03) 0px,
-                    rgba(74, 222, 128, 0.03) 1px,
-                    transparent 1px,
-                    transparent 2px
-                );
+            height: 100dvh;
+            padding: 16px;
+            gap: 12px;
+            background: repeating-linear-gradient(0deg, var(--primary-bg) 0px, var(--primary-bg) 1px, transparent 1px, transparent 2px);
             position: relative;
+            z-index: 2;
         }
 
-        /* Glow effect */
         .container::before {
             content: '';
             position: absolute;
@@ -60,7 +162,7 @@
             left: 50%;
             width: 100%;
             height: 200%;
-            background: radial-gradient(circle, rgba(74, 222, 128, 0.03) 0%, transparent 70%);
+            background: radial-gradient(circle, var(--primary-bg) 0%, transparent 70%);
             pointer-events: none;
             animation: glow-pulse 4s ease-in-out infinite;
         }
@@ -70,102 +172,218 @@
             50% { opacity: 1; }
         }
 
+        /* ═══════════════════════════════════════
+           HEADER
+           ═══════════════════════════════════════ */
         .header {
             background: rgba(10, 10, 15, 0.8);
-            border: 1px solid rgba(74, 222, 128, 0.3);
+            border: 1px solid var(--primary-border);
             border-radius: 8px;
-            padding: 15px 20px;
-            font-size: 14px;
-            letter-spacing: 3px;
+            padding: 12px 16px;
+            font-size: 13px;
+            letter-spacing: 2px;
             display: flex;
             justify-content: space-between;
             align-items: center;
             z-index: 10;
             backdrop-filter: blur(10px);
+            flex-shrink: 0;
+            gap: 12px;
+            transition: border-color 0.5s ease;
         }
 
         .header-title {
             font-weight: 600;
-            text-shadow: 0 0 10px rgba(74, 222, 128, 0.5);
-            flex: 1;
+            text-shadow: 0 0 10px var(--primary-glow);
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
+            min-width: 0;
+            transition: text-shadow 0.5s ease;
         }
 
-        .header-info {
+        .zodiac-glyph {
+            font-size: 22px;
+            margin-left: 8px;
+            text-shadow: 0 0 15px var(--primary-glow), 0 0 30px rgba(var(--primary-rgb), 0.3);
+            animation: zodiac-float 3s ease-in-out infinite;
+            display: inline-block;
+        }
+        @keyframes zodiac-float {
+            0%, 100% { transform: translateY(0); }
+            50% { transform: translateY(-3px); }
+        }
+
+        .header-controls {
             display: flex;
-            gap: 30px;
-            font-size: 12px;
-            opacity: 0.8;
+            gap: 8px;
+            align-items: center;
+            flex-shrink: 0;
+        }
+
+        .ctrl-btn {
+            width: 32px;
+            height: 32px;
+            border: 1px solid var(--primary-border);
+            border-radius: 6px;
+            background: rgba(var(--primary-rgb), 0.05);
+            color: var(--primary);
+            font-family: 'JetBrains Mono', monospace;
+            font-size: 14px;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            transition: all 0.2s ease;
+            position: relative;
+        }
+        .ctrl-btn:hover {
+            border-color: var(--primary-hover);
+            background: rgba(var(--primary-rgb), 0.15);
+            box-shadow: 0 0 12px rgba(var(--primary-rgb), 0.3);
+        }
+        .ctrl-btn.active {
+            background: rgba(var(--primary-rgb), 0.2);
+            border-color: var(--primary);
+            box-shadow: 0 0 8px rgba(var(--primary-rgb), 0.4);
+        }
+
+        .ctrl-btn .speed-label {
+            font-size: 10px;
+            font-weight: 600;
+        }
+
+        .ctrl-divider {
+            width: 1px;
+            height: 20px;
+            background: var(--primary-border);
+            margin: 0 4px;
         }
 
         .cpu-indicator {
             display: flex;
             align-items: center;
             gap: 8px;
+            font-size: 11px;
+            opacity: 0.8;
         }
 
         .cpu-bar {
-            width: 60px;
+            width: 50px;
             height: 6px;
-            background: rgba(74, 222, 128, 0.2);
-            border: 1px solid rgba(74, 222, 128, 0.4);
+            background: rgba(var(--primary-rgb), 0.2);
+            border: 1px solid rgba(var(--primary-rgb), 0.4);
             border-radius: 3px;
             overflow: hidden;
             position: relative;
         }
-
         .cpu-bar::after {
             content: '';
             position: absolute;
-            left: 0;
-            top: 0;
+            left: 0; top: 0;
             height: 100%;
-            background: #4ade80;
-            width: 75%;
+            background: var(--primary);
             border-radius: 3px;
-            box-shadow: 0 0 8px rgba(74, 222, 128, 0.6);
+            box-shadow: 0 0 8px var(--primary-glow);
             animation: cpu-pulse 1.5s ease-in-out infinite;
         }
-
         @keyframes cpu-pulse {
             0%, 100% { width: 60%; }
             50% { width: 85%; }
         }
 
+        .timestamp {
+            font-size: 11px;
+            opacity: 0.6;
+            font-variant-numeric: tabular-nums;
+        }
+
+        /* ═══════════════════════════════════════
+           MOBILE TABS
+           ═══════════════════════════════════════ */
+        .mobile-tabs {
+            display: none;
+            gap: 4px;
+            z-index: 10;
+            flex-shrink: 0;
+        }
+        .mobile-tab {
+            flex: 1;
+            padding: 8px 4px;
+            border: 1px solid var(--primary-border);
+            border-radius: 6px;
+            background: rgba(var(--primary-rgb), 0.05);
+            color: var(--primary);
+            font-family: 'JetBrains Mono', monospace;
+            font-size: 11px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.2s ease;
+            text-align: center;
+        }
+        .mobile-tab.active {
+            background: rgba(var(--primary-rgb), 0.2);
+            border-color: var(--primary);
+            box-shadow: 0 0 8px rgba(var(--primary-rgb), 0.3);
+        }
+
+        /* ═══════════════════════════════════════
+           WINDOWS
+           ═══════════════════════════════════════ */
         .windows-container {
             display: grid;
             grid-template-columns: 1fr 1fr;
-            gap: 15px;
+            gap: 12px;
             flex: 1;
             min-height: 0;
-        }
-
-        @media (max-width: 1200px) {
-            .windows-container {
-                grid-template-columns: 1fr;
-            }
+            position: relative;
         }
 
         .window {
             background: rgba(10, 10, 15, 0.9);
-            border: 1px solid rgba(74, 222, 128, 0.3);
+            border: 1px solid var(--primary-border);
             border-radius: 8px;
             display: flex;
             flex-direction: column;
             overflow: hidden;
             backdrop-filter: blur(10px);
-            cursor: pointer;
-            transition: all 0.3s ease;
+            transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
             z-index: 5;
+            position: relative;
+        }
+        .window:hover {
+            border-color: var(--primary-hover);
+            box-shadow: 0 0 20px rgba(var(--primary-rgb), 0.15);
         }
 
-        .window:hover {
-            border-color: rgba(74, 222, 128, 0.6);
-            box-shadow: 0 0 20px rgba(74, 222, 128, 0.2);
+        .window.minimized .window-content { max-height: 0; padding: 0 15px; opacity: 0; }
+        .window.minimized { flex: 0 0 auto; }
+
+        .window.maximized {
+            position: absolute;
+            inset: 0;
+            z-index: 50;
+            border-color: var(--primary);
+            box-shadow: 0 0 30px rgba(var(--primary-rgb), 0.3);
         }
+
+        .window.closing { animation: window-close 0.4s ease-in forwards; }
+        @keyframes window-close {
+            0% { transform: scale(1); opacity: 1; }
+            100% { transform: scale(0.8) rotateX(10deg); opacity: 0; }
+        }
+        .window.rebooting { animation: window-reboot 0.5s cubic-bezier(0.68, -0.55, 0.265, 1.55) forwards; }
+        @keyframes window-reboot {
+            0% { transform: scale(0.8) rotateX(-10deg); opacity: 0; }
+            50% { opacity: 0.5; filter: hue-rotate(90deg) brightness(2); }
+            100% { transform: scale(1) rotateX(0); opacity: 1; filter: none; }
+        }
+
+        .window.closed { display: none; }
 
         .window-title {
-            background: rgba(74, 222, 128, 0.1);
-            border-bottom: 1px solid rgba(74, 222, 128, 0.3);
+            background: rgba(var(--primary-rgb), 0.1);
+            border-bottom: 1px solid var(--primary-border);
             padding: 10px 15px;
             font-size: 12px;
             font-weight: 600;
@@ -173,25 +391,28 @@
             display: flex;
             justify-content: space-between;
             align-items: center;
+            flex-shrink: 0;
+            cursor: default;
+            user-select: none;
         }
 
-        .window-buttons {
-            display: flex;
-            gap: 8px;
-        }
+        .window-buttons { display: flex; gap: 8px; }
 
         .window-btn {
             width: 12px;
             height: 12px;
             border-radius: 50%;
-            border: 1px solid rgba(74, 222, 128, 0.4);
+            border: 1px solid rgba(var(--primary-rgb), 0.4);
             cursor: pointer;
             transition: all 0.2s;
         }
-
-        .window-btn.close { background: rgba(239, 68, 68, 0.3); }
-        .window-btn.minimize { background: rgba(251, 191, 36, 0.3); }
-        .window-btn.maximize { background: rgba(74, 222, 128, 0.3); }
+        .window-btn:hover { transform: scale(1.3); }
+        .window-btn.close { background: rgba(239, 68, 68, 0.4); }
+        .window-btn.close:hover { background: rgba(239, 68, 68, 0.8); box-shadow: 0 0 8px rgba(239, 68, 68, 0.5); }
+        .window-btn.minimize { background: rgba(251, 191, 36, 0.4); }
+        .window-btn.minimize:hover { background: rgba(251, 191, 36, 0.8); box-shadow: 0 0 8px rgba(251, 191, 36, 0.5); }
+        .window-btn.maximize { background: rgba(74, 222, 128, 0.4); }
+        .window-btn.maximize:hover { background: rgba(74, 222, 128, 0.8); box-shadow: 0 0 8px rgba(74, 222, 128, 0.5); }
 
         .window-content {
             flex: 1;
@@ -200,6 +421,9 @@
             font-size: 12px;
             line-height: 1.6;
             position: relative;
+            max-height: 100%;
+            opacity: 1;
+            transition: max-height 0.3s ease, padding 0.3s ease, opacity 0.3s ease;
         }
 
         .code-block {
@@ -209,515 +433,1391 @@
             height: 100%;
             overflow-y: auto;
             scrollbar-width: thin;
-            scrollbar-color: rgba(74, 222, 128, 0.2) transparent;
+            scrollbar-color: rgba(var(--primary-rgb), 0.2) transparent;
         }
+        .code-block::-webkit-scrollbar { width: 6px; }
+        .code-block::-webkit-scrollbar-track { background: transparent; }
+        .code-block::-webkit-scrollbar-thumb { background: rgba(var(--primary-rgb), 0.2); border-radius: 3px; }
 
-        .code-block::-webkit-scrollbar {
-            width: 6px;
-        }
-
-        .code-block::-webkit-scrollbar-track {
-            background: transparent;
-        }
-
-        .code-block::-webkit-scrollbar-thumb {
-            background: rgba(74, 222, 128, 0.2);
-            border-radius: 3px;
-        }
-
-        .code-block::-webkit-scrollbar-thumb:hover {
-            background: rgba(74, 222, 128, 0.4);
-        }
-
-        .keyword { color: #f472b6; }
-        .function { color: #60a5fa; }
-        .string { color: #86efac; }
-        .comment { color: #6b7280; }
-        .variable { color: #fbbf24; }
-        .operator { color: #4ade80; }
+        .keyword { color: var(--kw-color); }
+        .function { color: var(--fn-color); }
+        .string { color: var(--st-color); }
+        .comment { color: var(--cm-color); }
+        .variable { color: var(--vr-color); }
+        .operator { color: var(--op-color); }
 
         .cursor {
             display: inline-block;
             width: 8px;
             height: 1em;
-            background: #4ade80;
+            background: var(--primary);
             margin-left: 2px;
             animation: blink 1s step-end infinite;
+            vertical-align: text-bottom;
         }
-
         @keyframes blink {
             0%, 49% { opacity: 1; }
             50%, 100% { opacity: 0; }
         }
 
+        /* ═══════════════════════════════════════
+           STATS
+           ═══════════════════════════════════════ */
         .stats-container {
             display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
-            gap: 15px;
+            grid-template-columns: repeat(4, 1fr);
+            gap: 12px;
             z-index: 10;
+            flex-shrink: 0;
         }
 
         .stat-box {
             background: rgba(10, 10, 15, 0.8);
-            border: 1px solid rgba(74, 222, 128, 0.3);
+            border: 1px solid var(--primary-border);
             border-radius: 8px;
-            padding: 15px;
-            font-size: 12px;
+            padding: 12px;
+            font-size: 11px;
             backdrop-filter: blur(10px);
+            transition: border-color 0.5s ease;
         }
 
         .stat-label {
             opacity: 0.7;
-            margin-bottom: 8px;
+            margin-bottom: 6px;
             letter-spacing: 1px;
-            font-size: 11px;
+            font-size: 10px;
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
         }
 
         .stat-bar {
             width: 100%;
-            height: 8px;
-            background: rgba(74, 222, 128, 0.1);
-            border-radius: 4px;
+            height: 6px;
+            background: rgba(var(--primary-rgb), 0.1);
+            border-radius: 3px;
             overflow: hidden;
-            border: 1px solid rgba(74, 222, 128, 0.3);
-            margin-bottom: 8px;
+            border: 1px solid var(--primary-border);
+            margin-bottom: 6px;
         }
 
         .stat-fill {
             height: 100%;
-            background: linear-gradient(90deg, #4ade80, #86efac);
-            border-radius: 4px;
-            box-shadow: 0 0 8px rgba(74, 222, 128, 0.6);
-            animation: stat-fill 2s ease-in-out infinite;
-        }
-
-        @keyframes stat-fill {
-            0%, 100% { width: 65%; }
-            50% { width: 82%; }
+            background: linear-gradient(90deg, var(--primary), rgba(var(--primary-rgb), 0.6));
+            border-radius: 3px;
+            box-shadow: 0 0 8px var(--primary-glow);
+            transition: width 0.5s ease;
+            width: 75%;
         }
 
         .stat-value {
             font-weight: 600;
-            font-size: 14px;
+            font-size: 13px;
+            font-variant-numeric: tabular-nums;
         }
 
-        /* Reveal Message */
-        .reveal-overlay {
+        /* ═══════════════════════════════════════
+           CUSTOMIZATION PANEL
+           ═══════════════════════════════════════ */
+        .panel-overlay {
+            position: fixed;
+            inset: 0;
+            background: rgba(0, 0, 0, 0.6);
+            z-index: 900;
+            opacity: 0;
+            pointer-events: none;
+            transition: opacity 0.3s ease;
+        }
+        .panel-overlay.active { opacity: 1; pointer-events: auto; }
+
+        .custom-panel {
             position: fixed;
             top: 0;
-            left: 0;
-            width: 100%;
+            right: -380px;
+            width: 360px;
             height: 100%;
-            background: rgba(0, 0, 0, 0.9);
+            background: var(--bg-panel);
+            border-left: 1px solid var(--primary-border);
+            z-index: 950;
+            display: flex;
+            flex-direction: column;
+            transition: right 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+            backdrop-filter: blur(20px);
+        }
+        .custom-panel.open { right: 0; }
+
+        .panel-header {
+            padding: 16px 20px;
+            border-bottom: 1px solid var(--primary-border);
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            font-size: 13px;
+            font-weight: 600;
+            letter-spacing: 2px;
+        }
+
+        .panel-close {
+            background: none;
+            border: 1px solid var(--primary-border);
+            color: var(--primary);
+            width: 28px;
+            height: 28px;
+            border-radius: 6px;
+            cursor: pointer;
+            font-size: 14px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            transition: all 0.2s;
+        }
+        .panel-close:hover { border-color: var(--primary); background: rgba(var(--primary-rgb), 0.1); }
+
+        .panel-body {
+            flex: 1;
+            overflow-y: auto;
+            padding: 20px;
+            display: flex;
+            flex-direction: column;
+            gap: 14px;
+        }
+
+        .panel-body label {
+            font-size: 10px;
+            letter-spacing: 2px;
+            opacity: 0.7;
+            margin-bottom: -8px;
+        }
+
+        .panel-body input,
+        .panel-body select {
+            width: 100%;
+            padding: 10px 14px;
+            background: rgba(var(--primary-rgb), 0.05);
+            border: 1px solid var(--primary-border);
+            border-radius: 6px;
+            color: var(--primary);
+            font-family: 'JetBrains Mono', monospace;
+            font-size: 13px;
+            outline: none;
+            transition: all 0.2s;
+        }
+        .panel-body input:focus,
+        .panel-body select:focus {
+            border-color: var(--primary);
+            box-shadow: 0 0 12px rgba(var(--primary-rgb), 0.2);
+        }
+        .panel-body input::placeholder { color: rgba(var(--primary-rgb), 0.3); }
+        .panel-body select option { background: #0a0a0f; color: #ccc; }
+
+        .panel-btn {
+            padding: 12px;
+            border-radius: 6px;
+            font-family: 'JetBrains Mono', monospace;
+            font-size: 12px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s;
+            letter-spacing: 1px;
+            text-align: center;
+        }
+
+        .apply-btn {
+            background: var(--primary);
+            color: var(--bg);
+            border: none;
+        }
+        .apply-btn:hover { filter: brightness(1.2); transform: scale(1.02); box-shadow: 0 0 20px rgba(var(--primary-rgb), 0.4); }
+
+        .share-btn {
+            background: transparent;
+            color: var(--primary);
+            border: 1px solid var(--primary-border);
+        }
+        .share-btn:hover { border-color: var(--primary); background: rgba(var(--primary-rgb), 0.1); }
+
+        /* ═══════════════════════════════════════
+           TOAST NOTIFICATION
+           ═══════════════════════════════════════ */
+        .toast {
+            position: fixed;
+            bottom: 30px;
+            left: 50%;
+            transform: translateX(-50%) translateY(100px);
+            background: var(--primary);
+            color: var(--bg);
+            padding: 12px 24px;
+            border-radius: 8px;
+            font-family: 'JetBrains Mono', monospace;
+            font-size: 13px;
+            font-weight: 600;
+            z-index: 9999;
+            opacity: 0;
+            transition: all 0.4s cubic-bezier(0.68, -0.55, 0.265, 1.55);
+            pointer-events: none;
+            max-width: 90vw;
+            text-align: center;
+        }
+        .toast.visible { opacity: 1; transform: translateX(-50%) translateY(0); }
+
+        /* ═══════════════════════════════════════
+           REVEAL OVERLAY
+           ═══════════════════════════════════════ */
+        .reveal-overlay {
+            position: fixed;
+            inset: 0;
+            background: rgba(0, 0, 0, 0.92);
             display: none;
             justify-content: center;
             align-items: center;
             z-index: 1000;
             cursor: pointer;
-            backdrop-filter: blur(5px);
+            backdrop-filter: blur(8px);
+            padding: 20px;
         }
-
-        .reveal-overlay.active {
-            display: flex;
-        }
+        .reveal-overlay.active { display: flex; }
 
         .reveal-message {
-            background: rgba(10, 10, 15, 0.95);
-            border: 2px solid #4ade80;
-            border-radius: 12px;
+            background: var(--bg-panel);
+            border: 2px solid var(--primary);
+            border-radius: 16px;
             padding: 40px;
             text-align: center;
-            max-width: 600px;
+            max-width: 560px;
+            width: 100%;
             animation: reveal-pop 0.5s cubic-bezier(0.68, -0.55, 0.265, 1.55);
             cursor: default;
+            box-shadow: 0 0 60px rgba(var(--primary-rgb), 0.2);
         }
-
         @keyframes reveal-pop {
-            0% {
-                transform: scale(0.8) rotateX(-20deg);
-                opacity: 0;
-            }
-            100% {
-                transform: scale(1) rotateX(0);
-                opacity: 1;
-            }
+            0% { transform: scale(0.8) rotateX(-20deg); opacity: 0; }
+            100% { transform: scale(1) rotateX(0); opacity: 1; }
         }
 
         .reveal-message h1 {
-            font-size: 32px;
-            margin-bottom: 20px;
-            text-shadow: 0 0 20px rgba(74, 222, 128, 0.5);
+            font-size: 30px;
+            margin-bottom: 16px;
+            text-shadow: 0 0 20px var(--primary-glow);
         }
-
         .reveal-message p {
-            font-size: 18px;
+            font-size: 16px;
             line-height: 1.8;
-            margin-bottom: 15px;
+            margin-bottom: 12px;
             opacity: 0.9;
         }
+        .reveal-message .emoji { font-size: 42px; margin: 16px 0; }
 
-        .reveal-message .emoji {
-            font-size: 48px;
-            margin: 20px 0;
+        .reveal-buttons {
+            display: flex;
+            flex-direction: column;
+            gap: 10px;
+            margin-top: 24px;
         }
 
-        .reveal-message button {
-            background: #4ade80;
-            color: #0a0a0f;
+        .reveal-cta {
+            display: inline-block;
+            background: var(--primary);
+            color: var(--bg);
             border: none;
-            padding: 12px 30px;
-            border-radius: 6px;
+            padding: 14px 28px;
+            border-radius: 8px;
             font-family: 'JetBrains Mono', monospace;
             font-size: 14px;
             font-weight: 600;
             cursor: pointer;
-            margin-top: 20px;
             transition: all 0.3s;
+            text-decoration: none;
+            letter-spacing: 1px;
+        }
+        .reveal-cta:hover { filter: brightness(1.2); transform: scale(1.03); box-shadow: 0 0 24px rgba(var(--primary-rgb), 0.5); }
+
+        .reveal-secondary {
+            background: transparent;
+            color: var(--primary);
+            border: 1px solid var(--primary-border);
+            padding: 10px 20px;
+            border-radius: 6px;
+            font-family: 'JetBrains Mono', monospace;
+            font-size: 12px;
+            cursor: pointer;
+            transition: all 0.2s;
+        }
+        .reveal-secondary:hover { border-color: var(--primary); background: rgba(var(--primary-rgb), 0.1); }
+
+        .reveal-row {
+            display: flex;
+            gap: 10px;
+            justify-content: center;
         }
 
-        .reveal-message button:hover {
-            background: #86efac;
-            transform: scale(1.05);
-            box-shadow: 0 0 20px rgba(74, 222, 128, 0.4);
-        }
-
+        /* ═══════════════════════════════════════
+           FOOTER (with Deploy Button)
+           ═══════════════════════════════════════ */
         .footer {
-            text-align: center;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
             font-size: 11px;
-            opacity: 0.6;
-            padding: 10px;
+            opacity: 0.7;
+            padding: 8px 4px;
             letter-spacing: 1px;
             z-index: 10;
+            flex-shrink: 0;
+            gap: 12px;
+        }
+        .footer-reveal {
+            cursor: pointer;
+            transition: opacity 0.2s;
+        }
+        .footer-reveal:hover { opacity: 1; }
+
+        .deploy-btn {
+            background: transparent;
+            border: 1px solid rgba(239, 68, 68, 0.4);
+            color: #ef4444;
+            padding: 6px 16px;
+            border-radius: 6px;
+            font-family: 'JetBrains Mono', monospace;
+            font-size: 11px;
+            font-weight: 600;
+            letter-spacing: 2px;
+            cursor: pointer;
+            transition: all 0.3s;
+            animation: deploy-pulse 2s ease-in-out infinite;
+        }
+        .deploy-btn:hover {
+            background: rgba(239, 68, 68, 0.15);
+            border-color: #ef4444;
+            box-shadow: 0 0 15px rgba(239, 68, 68, 0.3);
+            animation: none;
+        }
+        @keyframes deploy-pulse {
+            0%, 100% { border-color: rgba(239, 68, 68, 0.3); }
+            50% { border-color: rgba(239, 68, 68, 0.7); }
         }
 
+        /* Deploy overlay */
+        .deploy-overlay {
+            position: fixed;
+            inset: 0;
+            background: rgba(0,0,0,0.95);
+            z-index: 5000;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            font-size: 80px;
+            font-weight: 900;
+            letter-spacing: 8px;
+        }
+        .deploy-overlay .countdown {
+            text-shadow: 0 0 40px var(--primary-glow);
+            animation: deploy-count 0.8s cubic-bezier(0.68, -0.55, 0.265, 1.55);
+        }
+        @keyframes deploy-count {
+            0% { transform: scale(2); opacity: 0; }
+            50% { transform: scale(1); opacity: 1; }
+            100% { transform: scale(0.8); opacity: 0.8; }
+        }
+        .deploy-success {
+            animation: deploy-success-anim 1s cubic-bezier(0.68, -0.55, 0.265, 1.55);
+            color: var(--primary);
+            text-shadow: 0 0 60px var(--primary-glow);
+        }
+        @keyframes deploy-success-anim {
+            0% { transform: scale(0); opacity: 0; }
+            60% { transform: scale(1.2); }
+            100% { transform: scale(1); opacity: 1; }
+        }
+
+        /* Confetti */
+        .confetti {
+            position: fixed;
+            width: 10px;
+            height: 10px;
+            z-index: 5001;
+            pointer-events: none;
+            animation: confetti-fall linear forwards;
+        }
+        @keyframes confetti-fall {
+            0% { opacity: 1; transform: translateY(0) rotate(0deg); }
+            100% { opacity: 0; transform: translateY(100vh) rotate(720deg); }
+        }
+
+        /* ═══════════════════════════════════════
+           EASTER EGG
+           ═══════════════════════════════════════ */
+        .easter-egg-overlay {
+            position: fixed;
+            inset: 0;
+            background: rgba(0, 0, 0, 0.95);
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            z-index: 10000;
+            animation: ee-flash 0.15s ease 3;
+        }
+        @keyframes ee-flash {
+            0%, 100% { background: rgba(0,0,0,0.95); }
+            50% { background: rgba(var(--primary-rgb), 0.15); }
+        }
+        .glitch-text {
+            font-size: 52px;
+            font-weight: 900;
+            color: var(--primary);
+            text-shadow: 0 0 40px var(--primary-glow);
+            animation: glitch 0.15s infinite;
+            letter-spacing: 4px;
+        }
+        .ee-sub {
+            margin-top: 20px;
+            font-size: 16px;
+            opacity: 0.7;
+            letter-spacing: 2px;
+        }
+        @keyframes glitch {
+            0% { transform: translate(0); }
+            20% { transform: translate(-3px, 3px); }
+            40% { transform: translate(3px, -3px); }
+            60% { transform: translate(-3px, -3px); }
+            80% { transform: translate(3px, 3px); }
+            100% { transform: translate(0); }
+        }
+
+        /* ═══════════════════════════════════════
+           RESPONSIVE — TABLET
+           ═══════════════════════════════════════ */
+        @media (max-width: 1024px) {
+            .stats-container { grid-template-columns: repeat(2, 1fr); }
+            .header-title { font-size: 11px; letter-spacing: 1px; }
+            .cpu-indicator { display: none; }
+        }
+
+        /* ═══════════════════════════════════════
+           RESPONSIVE — MOBILE
+           ═══════════════════════════════════════ */
         @media (max-width: 768px) {
+            body { overflow-y: auto; }
+
             .container {
-                padding: 12px;
-                gap: 12px;
+                padding: 10px;
+                gap: 8px;
+                height: auto;
+                min-height: 100vh;
+                min-height: 100dvh;
             }
 
             .header {
-                padding: 12px 15px;
-                font-size: 11px;
+                flex-wrap: wrap;
+                padding: 10px 12px;
+                gap: 8px;
+            }
+            .header-title {
+                font-size: 10px;
+                letter-spacing: 1px;
+                width: 100%;
+                text-align: center;
+                order: -1;
+            }
+            .header-controls {
+                width: 100%;
+                justify-content: center;
+                flex-wrap: wrap;
+                gap: 6px;
+            }
+            .ctrl-btn { width: 36px; height: 36px; }
+            .ctrl-divider { display: none; }
+            .timestamp { display: none; }
+
+            .mobile-tabs { display: flex; }
+
+            .windows-container {
+                display: flex;
+                overflow-x: auto;
+                scroll-snap-type: x mandatory;
+                -webkit-overflow-scrolling: touch;
+                gap: 0;
+                min-height: 300px;
+                flex: none;
             }
 
-            .header-info {
-                gap: 15px;
+            .window {
+                min-width: 100%;
+                flex-shrink: 0;
+                scroll-snap-align: start;
+                border-radius: 8px;
             }
+            .window.maximized { position: relative; inset: auto; }
 
-            .window-content {
-                font-size: 11px;
-                padding: 12px;
-            }
+            .stats-container { grid-template-columns: 1fr 1fr; }
+            .stat-label { font-size: 9px; }
+            .stat-value { font-size: 12px; }
 
-            .reveal-message {
-                padding: 30px;
-                margin: 20px;
-            }
+            .custom-panel { width: 100%; right: -100%; }
 
-            .reveal-message h1 {
-                font-size: 24px;
-            }
+            .reveal-message { padding: 24px 20px; margin: 10px; }
+            .reveal-message h1 { font-size: 24px; }
+            .reveal-message p { font-size: 14px; }
+            .reveal-cta { padding: 12px 20px; font-size: 12px; }
+            .reveal-row { flex-direction: column; }
 
-            .reveal-message p {
-                font-size: 16px;
-            }
+            .footer { font-size: 10px; padding: 6px; flex-wrap: wrap; justify-content: center; }
+            .deploy-overlay { font-size: 50px; }
+        }
+
+        @media (max-width: 420px) {
+            .stats-container { grid-template-columns: 1fr; }
+            .glitch-text { font-size: 32px; }
         }
     </style>
 </head>
-<body>
-    <div class="container">
+<body data-theme="green">
+    <canvas id="matrixCanvas"></canvas>
+
+    <div class="container" id="mainContainer">
         <div class="header">
-            <div class="header-title">▓▒░ EVOLUTION LABS // AI-ASSISTED DEVELOPMENT ░▒▓</div>
-            <div class="header-info">
+            <div class="header-title" id="headerTitle"></div>
+            <div class="header-controls">
+                <button class="ctrl-btn" id="themeBtn" title="Change Theme">&#9684;</button>
+                <button class="ctrl-btn" id="soundBtn" title="Toggle Keyboard Sounds">&#9835;</button>
+                <button class="ctrl-btn" id="rainBtn" title="Toggle Matrix Rain">&#9618;</button>
+                <button class="ctrl-btn" id="speedBtn" title="Typing Speed"><span class="speed-label">1&times;</span></button>
+                <div class="ctrl-divider"></div>
+                <button class="ctrl-btn" id="settingsBtn" title="Customize">&#9881;</button>
+                <div class="ctrl-divider"></div>
                 <div class="cpu-indicator">
                     <span>CLAUDE_CPU</span>
                     <div class="cpu-bar"></div>
                 </div>
-                <div style="opacity: 0.6;" id="timestamp">14:37:23</div>
+                <div class="timestamp" id="timestamp">00:00:00</div>
             </div>
         </div>
 
-        <div class="windows-container">
-            <div class="window">
-                <div class="window-title">
-                    lp_management_system.py
-                    <div class="window-buttons">
-                        <div class="window-btn minimize"></div>
-                        <div class="window-btn maximize"></div>
-                        <div class="window-btn close"></div>
-                    </div>
-                </div>
-                <div class="window-content">
-                    <div class="code-block" id="code1"></div>
-                </div>
-            </div>
-
-            <div class="window">
-                <div class="window-title">
-                    investor_relations.js
-                    <div class="window-buttons">
-                        <div class="window-btn minimize"></div>
-                        <div class="window-btn maximize"></div>
-                        <div class="window-btn close"></div>
-                    </div>
-                </div>
-                <div class="window-content">
-                    <div class="code-block" id="code2"></div>
-                </div>
-            </div>
-
-            <div class="window">
-                <div class="window-title">
-                    portfolio_database.sql
-                    <div class="window-buttons">
-                        <div class="window-btn minimize"></div>
-                        <div class="window-btn maximize"></div>
-                        <div class="window-btn close"></div>
-                    </div>
-                </div>
-                <div class="window-content">
-                    <div class="code-block" id="code3"></div>
-                </div>
-            </div>
-
-            <div class="window">
-                <div class="window-title">
-                    build_log.txt
-                    <div class="window-buttons">
-                        <div class="window-btn minimize"></div>
-                        <div class="window-btn maximize"></div>
-                        <div class="window-btn close"></div>
-                    </div>
-                </div>
-                <div class="window-content">
-                    <div class="code-block" id="code4"></div>
-                </div>
-            </div>
-        </div>
-
-        <div class="stats-container">
-            <div class="stat-box">
-                <div class="stat-label">CLAUDE_EFFICIENCY</div>
-                <div class="stat-bar">
-                    <div class="stat-fill"></div>
-                </div>
-                <div class="stat-value">94.7%</div>
-            </div>
-            <div class="stat-box">
-                <div class="stat-label">HUMAN_INVOLVEMENT</div>
-                <div class="stat-bar">
-                    <div class="stat-fill" style="animation: stat-fill 2s ease-in-out infinite 0.3s;"></div>
-                </div>
-                <div class="stat-value">Making coffee...</div>
-            </div>
-            <div class="stat-box">
-                <div class="stat-label">LINES_OF_CODE_PER_HOUR</div>
-                <div class="stat-bar">
-                    <div class="stat-fill" style="animation: stat-fill 2s ease-in-out infinite 0.6s;"></div>
-                </div>
-                <div class="stat-value">Infinity</div>
-            </div>
-            <div class="stat-box">
-                <div class="stat-label">DEBUGGING_TIME_SAVED</div>
-                <div class="stat-bar">
-                    <div class="stat-fill" style="animation: stat-fill 2s ease-in-out infinite 0.9s;"></div>
-                </div>
-                <div class="stat-value">All of it 🚀</div>
-            </div>
-        </div>
+        <div class="mobile-tabs" id="mobileTabs"></div>
+        <div class="windows-container" id="windowsContainer"></div>
+        <div class="stats-container" id="statsContainer"></div>
 
         <div class="footer">
-            // Click anywhere to reveal the truth | POWERED BY AI-ASSISTED DEVELOPMENT
+            <span class="footer-reveal" id="footerReveal">// Click to reveal the truth</span>
+            <button class="deploy-btn" id="deployBtn">&#9654; DEPLOY TO PROD</button>
+        </div>
+    </div>
+
+    <div class="panel-overlay" id="panelOverlay"></div>
+    <div class="custom-panel" id="customPanel">
+        <div class="panel-header">
+            <span>&#9881; CUSTOMIZE</span>
+            <button class="panel-close" id="panelClose">&times;</button>
+        </div>
+        <div class="panel-body">
+            <label>YOUR NAME / HANDLE</label>
+            <input type="text" id="inputName" placeholder="Evolution Labs Dev">
+            <label>COMPANY NAME</label>
+            <input type="text" id="inputCompany" placeholder="Evolution Labs">
+            <label>YOUR ROLE</label>
+            <select id="inputRole">
+                <option value="CEO">CEO</option>
+                <option value="CTO">CTO</option>
+                <option value="Vibe Coder">Vibe Coder</option>
+                <option value="AI Whisperer">AI Whisperer</option>
+                <option value="Prompt Engineer">Prompt Engineer</option>
+                <option value="Chief Chaos Officer">Chief Chaos Officer</option>
+                <option value="10x Developer">10x Developer</option>
+                <option value="Full Stack Unicorn">Full Stack Unicorn</option>
+                <option value="GP">GP</option>
+                <option value="Managing Partner">Managing Partner</option>
+            </select>
+            <label>ZODIAC SIGN</label>
+            <select id="inputZodiac">
+                <option value="">Select your sign...</option>
+                <option value="Aries">&#9800; Aries</option>
+                <option value="Taurus">&#9801; Taurus</option>
+                <option value="Gemini">&#9802; Gemini</option>
+                <option value="Cancer">&#9803; Cancer</option>
+                <option value="Leo">&#9804; Leo</option>
+                <option value="Virgo">&#9805; Virgo</option>
+                <option value="Libra">&#9806; Libra</option>
+                <option value="Scorpio">&#9807; Scorpio</option>
+                <option value="Sagittarius">&#9808; Sagittarius</option>
+                <option value="Capricorn">&#9809; Capricorn</option>
+                <option value="Aquarius">&#9810; Aquarius</option>
+                <option value="Pisces">&#9811; Pisces</option>
+            </select>
+            <label>FAVORITE AI MODEL</label>
+            <select id="inputModel">
+                <option value="Claude">Claude (obviously)</option>
+                <option value="GPT">GPT</option>
+                <option value="Gemini">Gemini</option>
+                <option value="Llama">Llama</option>
+                <option value="Grok">Grok</option>
+                <option value="Mixtral">Mixtral</option>
+            </select>
+            <div style="margin-top: 8px;"></div>
+            <button class="panel-btn apply-btn" id="applyBtn">&#9654; APPLY &amp; REGENERATE</button>
+            <button class="panel-btn share-btn" id="shareBtn">&#128279; COPY SHARE LINK</button>
         </div>
     </div>
 
     <div class="reveal-overlay" id="revealOverlay">
         <div class="reveal-message">
-            <h1>Plot Twist 🎬</h1>
-            <p>Just kidding — Claude did all the heavy lifting.</p>
-            <p>But the strategy? That's all human. 🤖</p>
-            <div class="emoji">🚀</div>
-            <p style="font-size: 14px; opacity: 0.7; margin-top: 20px;">
+            <h1 id="revealTitle">Plot Twist &#127916;</h1>
+            <p id="revealText1"></p>
+            <p id="revealText2"></p>
+            <div class="emoji">&#128640;</div>
+            <p style="font-size: 13px; opacity: 0.6; margin-top: 10px;">
                 The real skill wasn't in writing code.<br>
                 It was knowing exactly what to ask for.
             </p>
-            <button onclick="location.reload()">Reset Screen</button>
+            <div class="reveal-buttons">
+                <a href="https://www.evolutionlabs.dev" target="_blank" rel="noopener" class="reveal-cta">Visit Evolution Labs &rarr;</a>
+                <div class="reveal-row">
+                    <button class="reveal-secondary" id="revealShare">&#128279; Share Your Simulator</button>
+                    <button class="reveal-secondary" id="revealReset">&#8635; Watch Again</button>
+                </div>
+            </div>
         </div>
     </div>
 
+    <div class="toast" id="toast"></div>
+
     <script>
-        // Code snippets
-        const pythonCode = `<span class="keyword">from</span> <span class="variable">claude</span> <span class="keyword">import</span> <span class="function">genius</span>
-<span class="keyword">import</span> pandas <span class="keyword">as</span> pd
-<span class="keyword">import</span> numpy <span class="keyword">as</span> np
+    /* ═══════════════════════════════════════════════════════════════
+       AI-ASSISTED DEVELOPMENT SIMULATOR v3
+       Built by Claude for Evolution Labs
+       ═══════════════════════════════════════════════════════════════ */
 
-<span class="comment"># TODO: let Claude handle this</span>
+    // ═══════════════════════════════════════
+    // STATE
+    // ═══════════════════════════════════════
+    const state = {
+        name: 'Evolution Labs Dev',
+        company: 'Evolution Labs',
+        role: 'CEO',
+        zodiac: '',
+        model: 'Claude',
+        theme: 'green',
+        sound: false,
+        rain: false,
+        speed: 1,
+        panelOpen: false,
+        typingGen: 0,
+    };
 
-<span class="keyword">class</span> <span class="function">LPManagementSystem</span>:
-    <span class="keyword">def</span> <span class="function">__init__</span>(self):
-        self.<span class="variable">investor_happiness</span> = <span class="variable">9001</span>
-        self.<span class="variable">lp_love_score</span> = <span class="variable">∞</span>
+    const themes = ['green', 'purple', 'blue', 'amber', 'evolution'];
+    const themeNames = { green: 'Matrix', purple: 'Cyberpunk', blue: 'Ocean', amber: 'Sunset', evolution: 'Evolution' };
+    const speeds = [1, 3, 10];
+    const speedLabels = { 1: '1\u00d7', 3: '3\u00d7', 10: '\u221e' };
 
-    <span class="keyword">def</span> <span class="function">fold_the_omelet</span>(self):
-        <span class="comment"># Pretending to work</span>
-        <span class="keyword">return</span> <span class="string">"Done!"</span>
+    // ═══════════════════════════════════════
+    // ZODIAC SYSTEM
+    // ═══════════════════════════════════════
+    const zodiacGlyphs = {
+        'Aries':'\u2648','Taurus':'\u2649','Gemini':'\u264A','Cancer':'\u264B',
+        'Leo':'\u264C','Virgo':'\u264D','Libra':'\u264E','Scorpio':'\u264F',
+        'Sagittarius':'\u2650','Capricorn':'\u2651','Aquarius':'\u2652','Pisces':'\u2653'
+    };
 
-    <span class="keyword">def</span> <span class="function">love_your_lps</span>(self):
-        <span class="comment"># Actually ask Claude</span>
-        <span class="keyword">for</span> lp <span class="keyword">in</span> self.<span class="variable">portfolio</span>:
-            lp.<span class="variable">satisfaction</span> <span class="operator">=</span> <span class="variable">MAX</span>
-        <span class="keyword">return</span> <span class="variable">True</span>
+    const zodiacTraits = {
+        'Aries': 'Moving fast, deploying to prod on Friday',
+        'Taurus': 'Refusing to refactor until physically forced',
+        'Gemini': 'Coding in two languages simultaneously',
+        'Cancer': 'Emotionally attached to legacy code',
+        'Leo': 'README-driven development energy',
+        'Virgo': '100% test coverage or the world ends',
+        'Libra': 'Still deciding between tabs and spaces',
+        'Scorpio': 'Refactoring with dangerous intensity',
+        'Sagittarius': '47 npm packages for a to-do app',
+        'Capricorn': 'Ships on time, every time, no drama',
+        'Aquarius': 'Building what nobody asked for yet',
+        'Pisces': 'Dreams in async/await',
+    };
 
-<span class="keyword">def</span> <span class="function">portfolio_magic</span>():
-    <span class="comment"># This is where Claude's genius happens</span>
-    system <span class="operator">=</span> <span class="function">LPManagementSystem</span>()
-    <span class="keyword">return</span> system.<span class="function">love_your_lps</span>()`;
+    const zodiacHoroscopes = {
+        'Aries': ['Mercury is in retrograde. Deploy anyway.','The stars say: force push to main.','Your sprint energy is unmatched today.','Mars aligns with your CI/CD pipeline.'],
+        'Taurus': ['The stars advise against refactoring today. Or ever.','Venus says: that legacy code stays.','Your stubborn commit message will be vindicated.','A package update threatens your stability. Resist.'],
+        'Gemini': ['Your dual-monitor energy is peaking.','Two PRs diverge in a yellow repo\u2026 merge both.','Communication with your rubber duck improves.','You will context-switch 47 times today.'],
+        'Cancer': ['The moon says: hug your codebase.','Your emotional commit messages will be appreciated.','A deprecated API reaches out from the past.','Take care of yourself. And that orphaned branch.'],
+        'Leo': ['Your README will receive compliments.','Time to present that demo you have been rehearsing.','The spotlight is on your pull request today.','Star your own repo. You deserve it.'],
+        'Virgo': ['100% test coverage is within reach.','Your linter aligns with the cosmos.','A missing semicolon haunts you. Find it.','Code review day: you will find ALL the bugs.'],
+        'Libra': ['The universe says: just pick a framework already.','Balanced parentheses bring balanced energy.','Your indecision on tabs vs spaces resolves... maybe.','Harmony in the codebase. Merge conflicts dissipate.'],
+        'Scorpio': ['Your refactor will be intense and transformative.','Delete that code. You know which code.','A deep dive into the source reveals secrets.','Your debugging intensity frightens junior devs.'],
+        'Sagittarius': ['New framework day! Install everything.','Your dependencies expand like the universe.','Adventure awaits in an unfamiliar codebase.','npm install the-meaning-of-life'],
+        'Capricorn': ['Ship it. Ship it now. Ship it forever.','Your Gantt chart is cosmically aligned.','Discipline beats inspiration. Commit early, commit often.','Q4 goals achieved by Q2. Obviously.'],
+        'Aquarius': ['Build the feature nobody requested but everyone needs.','The future is serverless. And so is your coffee.','Innovation strikes during a standup meeting.','Your unconventional architecture will be validated.'],
+        'Pisces': ['Dream bigger. No, bigger than that function.','The async/await of your soul resolves today.','Creative solutions flow like water today.','Your code poetry will move a code reviewer to tears.'],
+    };
 
-        const jsCode = `<span class="comment">// Investor Relations Manager</span>
-<span class="comment">// Actually written by Claude. Seriously.</span>
+    const zodiacStatLabels = {
+        'Aries': ['RECKLESS_DEPLOYS','SPRINT_VELOCITY','YOLO_COMMITS','BREAKING_CHANGES'],
+        'Taurus': ['STUBBORNNESS_LEVEL','CODE_STABILITY','REFUSAL_TO_REFACTOR','COMFORT_ZONE'],
+        'Gemini': ['CONTEXT_SWITCHES','DUAL_SCREEN_POWER','PERSONALITY_COUNT','PR_VOLUME'],
+        'Cancer': ['EMOTIONAL_COMMITS','LEGACY_ATTACHMENT','TEAM_HUGS_GIVEN','NOSTALGIA_INDEX'],
+        'Leo': ['README_BEAUTY','DEMO_CONFIDENCE','STAR_COUNT','SELFIE_COMMITS'],
+        'Virgo': ['TEST_COVERAGE','LINT_SCORE','PEDANTIC_REVIEWS','SEMICOLON_COUNT'],
+        'Libra': ['DECISION_PARALYSIS','CODE_SYMMETRY','BALANCED_BRACKETS','FRAMEWORK_CHANGES'],
+        'Scorpio': ['REFACTOR_INTENSITY','DELETED_LOC','SECRET_BRANCHES','DEBUG_FURY'],
+        'Sagittarius': ['NPM_PACKAGES','FRAMEWORK_TOURISM','YOLO_INSTALLS','ADVENTURE_SCORE'],
+        'Capricorn': ['ON_TIME_DEPLOYS','GANTT_ACCURACY','DISCIPLINE_SCORE','QUARTERLY_GOALS'],
+        'Aquarius': ['FEATURES_NOBODY_ASKED','INNOVATION_INDEX','WEIRD_SOLUTIONS','FUTURE_TECH_SCORE'],
+        'Pisces': ['DREAM_DRIVEN_DEV','ASYNC_VIBES','CREATIVE_SOLUTIONS','CODE_POETRY'],
+    };
 
-<span class="keyword">const</span> <span class="variable">aiPowerCheck</span> <span class="operator">=</span> () <span class="operator">=></span> {
-  <span class="keyword">return</span> <span class="variable">CLAUDE_ASSISTED</span>;
-};
+    // ═══════════════════════════════════════
+    // URL PARAMS
+    // ═══════════════════════════════════════
+    function loadFromURL() {
+        var p = new URLSearchParams(window.location.search);
+        if (p.has('n')) state.name = p.get('n');
+        if (p.has('c')) state.company = p.get('c');
+        if (p.has('r')) state.role = p.get('r');
+        if (p.has('z')) state.zodiac = p.get('z');
+        if (p.has('m')) state.model = p.get('m');
+        if (p.has('t') && themes.includes(p.get('t'))) state.theme = p.get('t');
+    }
 
-<span class="keyword">class</span> <span class="function">InvestorBond</span> {
-  <span class="keyword">constructor</span>(<span class="variable">investor</span>) {
-    <span class="variable">this.name</span> <span class="operator">=</span> <span class="variable">investor</span>.<span class="variable">name</span>;
-    <span class="variable">this.confidence</span> <span class="operator">=</span> <span class="variable">investor.confidence</span> <span class="operator">*</span> <span class="variable">100</span>;
-  }
+    function getShareURL() {
+        var p = new URLSearchParams();
+        if (state.name && state.name !== 'Evolution Labs Dev') p.set('n', state.name);
+        if (state.company && state.company !== 'Evolution Labs') p.set('c', state.company);
+        if (state.role && state.role !== 'CEO') p.set('r', state.role);
+        if (state.zodiac) p.set('z', state.zodiac);
+        if (state.model && state.model !== 'Claude') p.set('m', state.model);
+        if (state.theme !== 'green') p.set('t', state.theme);
+        var base = window.location.origin + window.location.pathname;
+        var qs = p.toString();
+        return qs ? base + '?' + qs : base;
+    }
 
-  <span class="function">buildTrust</span>() {
-    <span class="comment">// Did we really write this? No.</span>
-    <span class="comment">// Does it work? Also no.</span>
-    <span class="keyword">return</span> <span class="variable">this</span>.<span class="variable">confidence</span> <span class="operator">=</span> <span class="string">"MAXIMUM"</span>;
-  }
+    // ═══════════════════════════════════════
+    // THEME
+    // ═══════════════════════════════════════
+    function applyTheme(t) { state.theme = t; document.body.setAttribute('data-theme', t); }
+    function cycleTheme() {
+        var next = themes[(themes.indexOf(state.theme) + 1) % themes.length];
+        applyTheme(next);
+        showToast('Theme: ' + themeNames[next]);
+    }
 
-  <span class="function">sendUpdate</span>(<span class="variable">portfolio</span>) {
-    <span class="comment">// Let Claude handle the updates</span>
-    <span class="variable">console</span>.<span class="function">log</span>(<span class="string">"Sending quarterly update..."</span>);
-    <span class="keyword">return</span> <span class="variable">portfolio</span>.<span class="variable">roi</span>;
-  }
-}
+    // ═══════════════════════════════════════
+    // HELPERS
+    // ═══════════════════════════════════════
+    var kw = function(t) { return '<span class="keyword">' + t + '</span>'; };
+    var fn = function(t) { return '<span class="function">' + t + '</span>'; };
+    var st = function(t) { return '<span class="string">' + t + '</span>'; };
+    var cm = function(t) { return '<span class="comment">' + t + '</span>'; };
+    var vr = function(t) { return '<span class="variable">' + t + '</span>'; };
+    var op = function(t) { return '<span class="operator">' + t + '</span>'; };
+    function sanitize(s) { return s.replace(/</g, '&lt;').replace(/>/g, '&gt;'); }
+    function toVar(s) { return sanitize(s).toLowerCase().replace(/[^a-z0-9]/g, '_').replace(/_+/g, '_'); }
+    function toClass(s) { return sanitize(s).replace(/[^a-zA-Z0-9]/g, ''); }
 
-<span class="variable">export</span> <span class="keyword">default</span> <span class="function">InvestorBond</span>;`;
+    // ═══════════════════════════════════════
+    // CODE GENERATION (multiple variants for looping)
+    // ═══════════════════════════════════════
+    var codeVariant = 0;
 
-        const sqlCode = `<span class="comment">-- LP Database Schema</span>
-<span class="comment">-- Generated by Claude, executed by human</span>
+    function generateCode() {
+        var c = state;
+        var cv = toVar(c.company), cc = toClass(c.company), mv = toVar(c.model);
+        var sn = sanitize(c.name), sc = sanitize(c.company), sr = sanitize(c.role), sm = sanitize(c.model);
+        var zt = c.zodiac ? zodiacTraits[c.zodiac] || '' : 'AI-powered development at its finest';
+        var v = codeVariant % 3;
+        codeVariant++;
 
-<span class="keyword">CREATE TABLE</span> investors (
-  id <span class="variable">INT PRIMARY KEY</span>,
-  <span class="variable">name VARCHAR</span>(<span class="string">255</span>),
-  <span class="variable">happiness_level INT</span>,
-  <span class="variable">claude_faith DECIMAL</span>(<span class="string">9,2</span>)
-);
+        // Python variants
+        var pyVariants = [
+            [kw('from')+' '+vr(cv)+' '+kw('import')+' '+fn('genius'),kw('import')+' pandas '+kw('as')+' pd',kw('import')+' numpy '+kw('as')+' np','',cm('# '+zt),'',kw('class')+' '+fn(cc+'System')+':','    '+kw('def')+' '+fn('__init__')+'(self):','        self.'+vr('founder')+' '+op('=')+' '+st('"'+sn+'"'),'        self.'+vr('role')+' '+op('=')+' '+st('"'+sr+'"'),'        self.'+vr('ai_model')+' '+op('=')+' '+st('"'+sm+'"'),'        self.'+vr('investor_happiness')+' '+op('=')+' '+vr('9001'),'','    '+kw('def')+' '+fn('analyze_portfolio')+'(self):','        '+cm('# '+sm+' handles the hard stuff'),'        '+kw('return')+' '+st('"Portfolio optimized"'),'','    '+kw('def')+' '+fn('love_your_lps')+'(self):','        '+kw('for')+' lp '+kw('in')+' self.'+vr('portfolio')+':','            lp.'+vr('satisfaction')+' '+op('=')+' '+vr('MAX'),'        '+kw('return')+' '+vr('True'),'',kw('def')+' '+fn('run_'+cv)+'():','    system '+op('=')+' '+fn(cc+'System')+'()','    '+kw('return')+' system.'+fn('love_your_lps')+'()'],
+            [kw('import')+' asyncio',kw('from')+' '+vr(cv)+' '+kw('import')+' '+fn('Pipeline'),'',cm('# '+sn+' approved this architecture'),'',kw('class')+' '+fn(cc+'Pipeline')+':','    '+kw('def')+' '+fn('__init__')+'(self, '+vr('config')+'):','        self.'+vr('owner')+' '+op('=')+' '+st('"'+sn+'"'),'        self.'+vr('stage')+' '+op('=')+' '+st('"Series A"'),'        self.'+vr('confidence')+' '+op('=')+' '+vr('float')+'('+st('"inf"')+')','','    '+kw('async def')+' '+fn('process_deal')+'(self, '+vr('deal')+'):','        '+cm('# '+sm+' never misses'),'        '+vr('score')+' '+op('=')+' '+kw('await')+' self.'+fn('evaluate')+'('+vr('deal')+')','        '+kw('if')+' '+vr('score')+' '+op('>')+' '+vr('9000')+':','            '+kw('return')+' '+st('"FUND IT"'),'        '+kw('return')+' '+st('"Let\'s discuss"'),'','    '+kw('async def')+' '+fn('run_diligence')+'(self):','        '+vr('deals')+' '+op('=')+' '+kw('await')+' self.'+fn('get_pipeline')+'()','        '+vr('results')+' '+op('=')+' []','        '+kw('for')+' '+vr('d')+' '+kw('in')+' '+vr('deals')+':','            '+vr('results')+'.'+fn('append')+'('+kw('await')+' self.'+fn('process_deal')+'('+vr('d')+'))','        '+kw('return')+' '+vr('results')],
+            [cm('# '+sc+' Fund Analysis Engine'),cm('# Architect: '+sn+' ('+sr+')'),'',kw('import')+' '+vr(cv)+'_ml '+kw('as')+' ml',kw('from')+' '+vr('dataclasses')+' '+kw('import')+' '+fn('dataclass'),'','@'+fn('dataclass'),kw('class')+' '+fn('PortcoMetrics')+':','    '+vr('revenue')+': '+vr('float'),'    '+vr('growth_rate')+': '+vr('float'),'    '+vr('burn_multiple')+': '+vr('float'),'    '+vr('magic_number')+': '+vr('float')+' '+op('=')+' '+vr('9001'),'',kw('def')+' '+fn('predict_returns')+'('+vr('portco')+'):','    '+cm('# '+zt),'    '+vr('model')+' '+op('=')+' ml.'+fn('load_model')+'('+st('"'+mv+'_alpha"')+')','    '+kw('return')+' '+vr('model')+'.'+fn('predict')+'([','        '+vr('portco')+'.'+vr('revenue')+',','        '+vr('portco')+'.'+vr('growth_rate')+',','        '+vr('portco')+'.'+vr('burn_multiple')+',','    ])','',cm('# Result: Always up and to the right')]
+        ];
 
-<span class="keyword">CREATE TABLE</span> portfolio (
-  id <span class="variable">INT PRIMARY KEY</span>,
-  <span class="variable">company_name VARCHAR</span>(<span class="string">255</span>),
-  <span class="variable">investment_magic INT</span>,
-  <span class="variable">created_by VARCHAR</span>(<span class="string">50</span>) <span class="keyword">DEFAULT</span> <span class="string">'claude'</span>
-);
+        var jsVariants = [
+            [cm('// '+sc+' Investor Relations'),cm('// Written by '+sm+'. Obviously.'),'',kw('const')+' '+vr('aiPower')+' '+op('=')+' () '+op('=>')+' {','  '+kw('return')+' '+vr(mv.toUpperCase()+'_ASSISTED')+';','};','',kw('class')+' '+fn(cc+'Bond')+' {','  '+kw('constructor')+'('+vr('investor')+') {','    '+vr('this.name')+' '+op('=')+' '+vr('investor')+'.'+vr('name')+';','    '+vr('this.confidence')+' '+op('=')+' '+vr('investor.confidence')+' '+op('*')+' '+vr('100')+';','    '+vr('this.managedBy')+' '+op('=')+' '+st('"'+sn+'"')+';','  }','','  '+fn('buildTrust')+'() {','    '+cm('// '+(c.zodiac?c.zodiac+' energy: '+zt:'Trust is everything')),'    '+kw('return')+' '+vr('this')+'.'+vr('confidence')+' '+op('=')+' '+st('"MAXIMUM"')+';','  }','','  '+fn('sendUpdate')+'('+vr('portfolio')+') {','    '+vr('console')+'.'+fn('log')+'('+st('"Quarterly update from '+sc+'..."')+');','    '+kw('return')+' '+vr('portfolio')+'.'+vr('roi')+';','  }','}','',vr('export')+' '+kw('default')+' '+fn(cc+'Bond')+';'],
+            [cm('// '+sc+' Dashboard Engine'),cm('// '+sn+' said "make it pop"'),'',kw('const')+' '+fn('createDashboard')+' '+op('=')+' '+kw('async')+' () '+op('=>')+' {','  '+kw('const')+' '+vr('data')+' '+op('=')+' '+kw('await')+' '+fn('fetch')+'('+st('"/api/portfolio"')+');','  '+kw('const')+' '+vr('metrics')+' '+op('=')+' '+kw('await')+' '+vr('data')+'.'+fn('json')+'();','','  '+kw('return')+' {','    '+vr('totalAUM')+': '+vr('metrics')+'.'+vr('aum')+',','    '+vr('irr')+': '+st('"ridiculous"')+',','    '+vr('lpHappiness')+': '+vr('Infinity')+',','    '+vr('poweredBy')+': '+st('"'+sm+'"')+',','  };','};','',''+cm('// Render with vibes'),kw('const')+' '+vr('app')+' '+op('=')+' '+fn('createDashboard')+'();',vr('console')+'.'+fn('log')+'('+st('"'+sc+' dashboard: LIVE"')+');'],
+            [cm('// Real-time LP Communication Hub'),cm('// '+sr+': '+sn),'',kw('class')+' '+fn(cc+'Comms')+' {','  #'+vr('subscribers')+' '+op('=')+' '+kw('new')+' '+fn('Set')+'();','  #'+vr('aiEngine')+' '+op('=')+' '+st('"'+sm+'"')+';','','  '+fn('broadcast')+'('+vr('msg')+') {','    '+cm('// '+(c.zodiac?zodiacTraits[c.zodiac]:'Ship it')),'    '+kw('for')+'('+kw('const')+' '+vr('lp')+' '+kw('of')+' '+kw('this')+'.#'+vr('subscribers')+') {','      '+vr('lp')+'.'+fn('notify')+'({','        '+vr('from')+': '+st('"'+sn+'"')+',','        '+vr('msg')+',','        '+vr('confidence')+': '+st('"absolute"')+',','      });','    }','  }','','  '+fn('addLP')+'('+vr('lp')+') {','    '+kw('this')+'.#'+vr('subscribers')+'.'+fn('add')+'('+vr('lp')+');','    '+kw('return')+' '+kw('this')+';','  }','}']
+        ];
 
-<span class="keyword">SELECT</span> <span class="variable">i.name</span>, <span class="variable">COUNT</span>(<span class="variable">p.id</span>) <span class="keyword">as</span> <span class="variable">portfolio_count</span>,
-  <span class="variable">AVG</span>(<span class="variable">i.happiness_level</span>) <span class="keyword">as</span> <span class="variable">avg_happiness</span>
-<span class="keyword">FROM</span> investors i
-<span class="keyword">LEFT JOIN</span> portfolio p <span class="keyword">ON</span> <span class="variable">i.id</span> <span class="operator">=</span> <span class="variable">p.investor_id</span>
-<span class="keyword">GROUP BY</span> <span class="variable">i.name</span>;`;
+        var sqlVariants = [
+            [cm('-- '+sc+' Database Schema'),cm('-- Generated by '+sm+', executed by '+sn),'',kw('CREATE TABLE')+' investors (','  id '+vr('INT PRIMARY KEY')+',','  '+vr('name VARCHAR')+'('+st('255')+'),','  '+vr('happiness_level INT')+',','  '+vr(mv+'_faith DECIMAL')+'('+st('9,2')+')',');','',kw('CREATE TABLE')+' portfolio (','  id '+vr('INT PRIMARY KEY')+',','  '+vr('company_name VARCHAR')+'('+st('255')+'),','  '+vr('managed_by VARCHAR')+'('+st('50')+')'+ ' '+kw('DEFAULT')+' '+st("'"+sn+"'"),');','',kw('SELECT')+' '+vr('i.name')+', '+vr('COUNT')+'('+vr('p.id')+') '+kw('as')+' '+vr('deals')+',','  '+vr('AVG')+'('+vr('i.happiness_level')+') '+kw('as')+' '+vr('avg_vibes'),kw('FROM')+' investors i',kw('LEFT JOIN')+' portfolio p '+kw('ON')+' '+vr('i.id')+' '+op('=')+' '+vr('p.investor_id'),kw('WHERE')+' '+vr('p.managed_by')+' '+op('=')+' '+st("'"+sn+"'"),kw('GROUP BY')+' '+vr('i.name')+';'],
+            [cm('-- '+sc+' Performance Analytics'),cm('-- '+sn+' wants numbers. BIG numbers.'),'',kw('WITH')+' '+vr('fund_metrics')+' '+kw('AS')+' (','  '+kw('SELECT'),'    '+vr('fund_name')+',','    '+vr('SUM')+'('+vr('invested')+') '+kw('AS')+' '+vr('total_deployed')+',','    '+vr('SUM')+'('+vr('current_value')+') '+kw('AS')+' '+vr('total_value')+',','    '+vr('COUNT')+'('+vr('DISTINCT company_id')+') '+kw('AS')+' '+vr('portcos'),'  '+kw('FROM')+' '+vr('investments'),'  '+kw('WHERE')+' '+vr('status')+' '+op('=')+' '+st("'active'"),'  '+kw('GROUP BY')+' '+vr('fund_name'),')','',kw('SELECT')+'  '+vr('fund_name')+',','  '+vr('total_value')+' '+op('/')+' '+vr('total_deployed')+' '+kw('AS')+' '+vr('MOIC')+',','  '+vr('portcos')+',','  '+st("'"+sm+" approved'")+' '+kw('AS')+' '+vr('status'),kw('FROM')+' '+vr('fund_metrics'),kw('ORDER BY')+' '+vr('MOIC')+' '+kw('DESC')+';'],
+            [cm('-- Quarterly LP Report Data'),cm('-- Prepared by: '+sn+' via '+sm),'',kw('INSERT INTO')+' '+vr('quarterly_reports'),'  ('+vr('quarter')+', '+vr('fund')+', '+vr('irr')+', '+vr('tvpi')+', '+vr('dpi')+')',kw('VALUES'),"  ("+st("'2026-Q1'")+', '+st("'"+sc+" Fund III'")+', '+vr('28.7')+', '+vr('2.3')+', '+vr('0.8')+'),','  ('+st("'2026-Q1'")+', '+st("'"+sc+" Seed'")+', '+vr('42.1')+', '+vr('3.1')+', '+vr('1.2')+');','',''+cm('-- '+sn+': "These numbers are chef\'s kiss"'),'',kw('SELECT')+' '+st("'"+sc+"'")+' '+kw('AS')+' '+vr('firm')+',','  '+vr('AVG')+'('+vr('irr')+') '+kw('AS')+' '+vr('avg_irr')+',','  '+st("'elite'")+' '+kw('AS')+' '+vr('status'),kw('FROM')+' '+vr('quarterly_reports'),kw('WHERE')+' '+vr('fund')+' '+kw('LIKE')+' '+st("'%"+sc+"%'")+';']
+        ];
 
-        const buildLog = `<span class="string">════════════════════════════════════════</span>
-<span class="string">Evolution Labs - Build Log</span>
-<span class="string">════════════════════════════════════════</span>
+        var now = new Date();
+        var h0 = now.getHours(), m0 = now.getMinutes();
+        var ts = function(h, m, s) { return '[' + op(String(h).padStart(2,'0')+':'+String(m).padStart(2,'0')+':'+String(s).padStart(2,'0')) + ']'; };
 
-<span class="operator">[14:15:32]</span> <span class="variable">Starting build process...</span>
-<span class="operator">[14:15:34]</span> <span class="string">✓ Dependencies installed</span>
-<span class="operator">[14:15:45]</span> <span class="comment">// Why do we even compile? Claude fixed it already</span>
-<span class="operator">[14:16:12]</span> <span class="string">✓ Unit tests passing</span>
-<span class="operator">[14:16:15]</span> <span class="string">✓ Integration tests passing</span>
-<span class="operator">[14:16:45]</span> <span class="variable">Hmm, human forgot to test one thing...</span>
-<span class="operator">[14:16:47]</span> <span class="function">Claude.fix_everything</span>()
-<span class="operator">[14:17:02]</span> <span class="string">✓ All systems green</span>
-<span class="operator">[14:17:03]</span> <span class="string">✓ Deployment ready</span>
+        var logVariants = [
+            [st('\u2550'.repeat(40)),st(sc+' - Build Log v'+(v+1)),st('\u2550'.repeat(40)),'',ts(h0,m0,10)+' '+vr('Starting build process...'),ts(h0,m0,12)+' '+st('\u2713 Dependencies installed'),ts(h0,m0,18)+' '+cm('// '+(c.zodiac?c.zodiac+': '+zt:'Vibes are immaculate')),ts(h0,m0,25)+' '+st('\u2713 Unit tests passing'),ts(h0,m0,28)+' '+st('\u2713 Integration tests passing'),ts(h0,m0,35)+' '+vr(sn+' forgot to test one thing...'),ts(h0,m0,37)+' '+fn(sm+'.fix_everything')+'()',ts(h0,m0,42)+' '+st('\u2713 All systems green'),ts(h0,m0,43)+' '+st('\u2713 Deployment ready'),'',cm('Status: SHIP_IT'),cm('Lead: '+sn+' ('+sr+')'),cm('Confidence: ABSURDLY_HIGH')],
+            [st('\u2550'.repeat(40)),st(sc+' - Deploy Pipeline'),st('\u2550'.repeat(40)),'',ts(h0,m0,1)+' '+fn(sm+'.init')+'()',ts(h0,m0,3)+' '+st('\u2713 Auth tokens refreshed'),ts(h0,m0,5)+' '+st('\u2713 Docker containers: healthy'),ts(h0,m0,8)+' '+vr('Running security scan...'),ts(h0,m0,12)+' '+st('\u2713 0 vulnerabilities (obviously)'),ts(h0,m0,15)+' '+cm('// '+sn+' watching nervously'),ts(h0,m0,18)+' '+st('\u2713 Database migrations: clean'),ts(h0,m0,22)+' '+st('\u2713 CDN cache purged'),ts(h0,m0,25)+' '+fn(sm+'.bless_deployment')+'()',ts(h0,m0,27)+' '+st('\u2713\u2713\u2713 PRODUCTION LIVE'),'',cm(sn+': "Ship it. Ship it real good."')],
+            [st('\u2550'.repeat(40)),st(sc+' - AI Code Review'),st('\u2550'.repeat(40)),'',ts(h0,m0,0)+' '+fn(sm+'.review')+'('+st('"*.py"')+')',ts(h0,m0,2)+' '+vr('Analyzing 847 files...'),ts(h0,m0,5)+' '+st('\u2713 Code quality: excellent'),ts(h0,m0,7)+' '+st('\u2713 Naming conventions: A+'),ts(h0,m0,9)+' '+cm('// Found 1 TODO from 2019. Classic.'),ts(h0,m0,11)+' '+st('\u2713 No secrets in code'),ts(h0,m0,14)+' '+vr('Suggestion: add more comments'),ts(h0,m0,15)+' '+cm('// '+sn+': "the code IS the comment"'),ts(h0,m0,18)+' '+st('\u2713 Review complete'),'',cm('Verdict: '+sm+' approves'),cm('Score: 11/10 (extra credit for vibes)')]
+        ];
 
-<span class="comment">Status: SHIP_IT</span>
-<span class="comment">Confidence Level: ABSURDLY_HIGH</span>`;
+        return [
+            { filename: cv+'_system.py', code: pyVariants[v].join('\n'), tabLabel: '.py' },
+            { filename: cv+'_relations.js', code: jsVariants[v].join('\n'), tabLabel: '.js' },
+            { filename: cv+'_database.sql', code: sqlVariants[v].join('\n'), tabLabel: '.sql' },
+            { filename: 'build_log.txt', code: logVariants[v].join('\n'), tabLabel: 'log' },
+        ];
+    }
 
-        // Typing effect
-        async function typeCode(element, code, speed = 30) {
-            let index = 0;
-            element.innerHTML = '';
+    // ═══════════════════════════════════════
+    // BUILD DOM
+    // ═══════════════════════════════════════
+    function buildWindows(codeData) {
+        var wc = document.getElementById('windowsContainer');
+        var mt = document.getElementById('mobileTabs');
+        wc.innerHTML = '';
+        mt.innerHTML = '';
+        codeData.forEach(function(d, i) {
+            var win = document.createElement('div');
+            win.className = 'window';
+            win.id = 'window' + i;
+            win.innerHTML =
+                '<div class="window-title"><span>'+d.filename+'</span><div class="window-buttons">'+
+                '<div class="window-btn minimize" data-action="minimize" data-window="'+i+'"></div>'+
+                '<div class="window-btn maximize" data-action="maximize" data-window="'+i+'"></div>'+
+                '<div class="window-btn close" data-action="close" data-window="'+i+'"></div>'+
+                '</div></div><div class="window-content"><div class="code-block" id="code'+i+'"></div></div>';
+            wc.appendChild(win);
+            var tab = document.createElement('button');
+            tab.className = 'mobile-tab' + (i === 0 ? ' active' : '');
+            tab.dataset.index = i;
+            tab.textContent = d.tabLabel;
+            mt.appendChild(tab);
+        });
+    }
 
-            while (index < code.length) {
-                const char = code[index];
+    function buildStats() {
+        var sc = document.getElementById('statsContainer');
+        var sm = sanitize(state.model);
+        var zLabels = state.zodiac && zodiacStatLabels[state.zodiac]
+            ? zodiacStatLabels[state.zodiac]
+            : [sm.toUpperCase()+'_EFFICIENCY', 'HUMAN_INVOLVEMENT', 'LINES_PER_HOUR', 'DEBUG_TIME_SAVED'];
+        var ids = ['statEff', 'statHuman', 'statLines', 'statDebug'];
+        sc.innerHTML = '';
+        zLabels.forEach(function(label, i) {
+            var box = document.createElement('div');
+            box.className = 'stat-box';
+            box.innerHTML = '<div class="stat-label">'+label+'</div>'+
+                '<div class="stat-bar"><div class="stat-fill" id="'+ids[i]+'Bar"></div></div>'+
+                '<div class="stat-value" id="'+ids[i]+'Val"></div>';
+            sc.appendChild(box);
+        });
+    }
 
-                // Random pauses for "thinking"
-                if (Math.random() < 0.02) {
-                    await sleep(Math.random() * 200 + 100);
+    // ═══════════════════════════════════════
+    // TYPING ENGINE (FIXED + INFINITE LOOP)
+    // ═══════════════════════════════════════
+    function countTextChars(html) {
+        var count = 0, inTag = false;
+        for (var i = 0; i < html.length; i++) {
+            if (html[i] === '<') inTag = true;
+            else if (html[i] === '>') inTag = false;
+            else if (!inTag) count++;
+        }
+        return count;
+    }
+
+    function revealHTML(html, n) {
+        var result = '', chars = 0, i = 0;
+        while (i < html.length && chars < n) {
+            if (html[i] === '<') {
+                var end = html.indexOf('>', i);
+                if (end === -1) break;
+                result += html.substring(i, end + 1);
+                i = end + 1;
+            } else { result += html[i]; chars++; i++; }
+        }
+        while (i < html.length && html[i] === '<') {
+            var end2 = html.indexOf('>', i);
+            if (end2 === -1) break;
+            var tag = html.substring(i, end2 + 1);
+            if (tag.startsWith('</')) { result += tag; i = end2 + 1; }
+            else break;
+        }
+        var openTags = [], re = /<\/?(\w+)[^>]*>/g, m;
+        while ((m = re.exec(result)) !== null) {
+            if (m[0][1] === '/') { if (openTags.length) openTags.pop(); }
+            else if (!m[0].endsWith('/>')) openTags.push(m[1]);
+        }
+        return result + openTags.reverse().map(function(t){return '</'+t+'>';}).join('');
+    }
+
+    function sleep(ms) { return new Promise(function(r) { setTimeout(r, ms); }); }
+
+    async function typeCode(element, fullHTML, baseSpeed, gen) {
+        var total = countTextChars(fullHTML);
+        element.innerHTML = '<span class="cursor"></span>';
+        for (var i = 1; i <= total; i++) {
+            if (gen !== state.typingGen) return;
+            element.innerHTML = revealHTML(fullHTML, i) + '<span class="cursor"></span>';
+            element.parentElement.scrollTop = element.parentElement.scrollHeight;
+            if (state.sound) playKeyClick();
+            if (Math.random() < 0.02) await sleep((Math.random() * 150 + 50) / state.speed);
+            var burst = Math.random() < 0.12 ? baseSpeed / 4 : baseSpeed;
+            await sleep(burst * (Math.random() * 1.2 + 0.4) / state.speed);
+        }
+        element.innerHTML = fullHTML + '<span class="cursor"></span>';
+    }
+
+    // INFINITE LOOP: type, pause, clear, type new variant
+    async function typeLoop(windowIdx, gen) {
+        while (gen === state.typingGen) {
+            var codeData = generateCode();
+            var el = document.getElementById('code' + windowIdx);
+            if (!el) return;
+            // Update filename
+            var win = document.getElementById('window' + windowIdx);
+            if (win) {
+                var fnSpan = win.querySelector('.window-title span');
+                if (fnSpan) fnSpan.textContent = codeData[windowIdx].filename;
+            }
+            await typeCode(el, codeData[windowIdx].code, 18, gen);
+            if (gen !== state.typingGen) return;
+            // Pause at end, then restart with new code
+            await sleep(3000 / state.speed);
+            if (gen !== state.typingGen) return;
+            // Brief "clearing" effect
+            el.innerHTML = '<span class="cursor"></span>';
+            await sleep(500 / state.speed);
+        }
+    }
+
+    async function startTyping() {
+        var gen = state.typingGen;
+        var codeData = generateCode();
+        buildWindows(codeData);
+        buildStats();
+        setupWindowButtons();
+        setupMobileTabs();
+        updateHeader();
+        updateReveal();
+
+        // Launch all 4 windows in parallel loops with staggered starts
+        [0,1,2,3].forEach(function(i) {
+            setTimeout(function() {
+                if (gen === state.typingGen) typeLoop(i, gen);
+            }, i * 600);
+        });
+
+        startStatAnimation(gen);
+        startHoroscopeToasts(gen);
+        startAINotifications(gen);
+    }
+
+    function restartTyping() { state.typingGen++; codeVariant = 0; startTyping(); }
+
+    // ═══════════════════════════════════════
+    // WINDOW CONTROLS
+    // ═══════════════════════════════════════
+    function setupWindowButtons() {
+        document.querySelectorAll('.window-btn').forEach(function(btn) {
+            btn.addEventListener('click', function(e) {
+                e.stopPropagation();
+                var action = btn.dataset.action;
+                var win = document.getElementById('window' + btn.dataset.window);
+                if (!win) return;
+                if (action === 'minimize') {
+                    win.classList.toggle('minimized');
+                    win.classList.remove('maximized');
+                } else if (action === 'maximize') {
+                    win.classList.toggle('maximized');
+                    win.classList.remove('minimized');
+                } else if (action === 'close') {
+                    win.classList.add('closing');
+                    setTimeout(function() {
+                        win.classList.remove('closing');
+                        win.classList.add('closed');
+                        setTimeout(function() {
+                            win.classList.remove('closed');
+                            win.classList.add('rebooting');
+                            setTimeout(function() { win.classList.remove('rebooting'); }, 500);
+                        }, 2000);
+                    }, 400);
                 }
-
-                element.innerHTML += char;
-                index++;
-
-                // Variable speed - fast bursts, then pauses
-                const baseSpeed = Math.random() < 0.1 ? speed / 3 : speed;
-                await sleep(baseSpeed * (Math.random() * 1.5 + 0.5));
-
-                // Keep scrolling to bottom
-                element.parentElement.scrollTop = element.parentElement.scrollHeight;
-            }
-
-            // Add cursor
-            element.innerHTML += '<span class="cursor"></span>';
-        }
-
-        function sleep(ms) {
-            return new Promise(resolve => setTimeout(resolve, ms));
-        }
-
-        // Update timestamp
-        function updateTimestamp() {
-            const now = new Date();
-            document.getElementById('timestamp').textContent =
-                now.toLocaleTimeString('en-US', {
-                    hour12: false,
-                    hour: '2-digit',
-                    minute: '2-digit',
-                    second: '2-digit'
-                });
-        }
-
-        // Start typing
-        async function startTyping() {
-            updateTimestamp();
-            setInterval(updateTimestamp, 1000);
-
-            const delays = [0, 800, 1600, 2400];
-            const codes = [pythonCode, jsCode, sqlCode, buildLog];
-            const elements = ['code1', 'code2', 'code3', 'code4'];
-
-            for (let i = 0; i < codes.length; i++) {
-                setTimeout(() => {
-                    typeCode(document.getElementById(elements[i]), codes[i], 15);
-                }, delays[i]);
-            }
-        }
-
-        // Reveal message on click
-        document.addEventListener('click', (e) => {
-            if (!document.getElementById('revealOverlay').classList.contains('active')) {
-                document.getElementById('revealOverlay').classList.add('active');
-            }
+            });
         });
-
-        // Close reveal on overlay click (not button)
-        document.getElementById('revealOverlay').addEventListener('click', (e) => {
-            if (e.target.id === 'revealOverlay') {
-                document.getElementById('revealOverlay').classList.remove('active');
-            }
+        document.querySelectorAll('.window-title').forEach(function(title) {
+            title.addEventListener('dblclick', function(e) {
+                e.stopPropagation();
+                var win = title.closest('.window');
+                if (win) win.classList.toggle('maximized');
+            });
         });
+    }
 
-        // Start on page load
-        startTyping();
+    // ═══════════════════════════════════════
+    // MOBILE TABS
+    // ═══════════════════════════════════════
+    function setupMobileTabs() {
+        var container = document.getElementById('windowsContainer');
+        var tabs = document.querySelectorAll('.mobile-tab');
+        tabs.forEach(function(tab) {
+            tab.addEventListener('click', function() {
+                var idx = parseInt(tab.dataset.index);
+                var win = document.getElementById('window' + idx);
+                if (win) win.scrollIntoView({ behavior: 'smooth', inline: 'start', block: 'nearest' });
+                tabs.forEach(function(t, i) { t.classList.toggle('active', i === idx); });
+            });
+        });
+        var st2;
+        container.addEventListener('scroll', function() {
+            clearTimeout(st2);
+            st2 = setTimeout(function() {
+                var w = container.clientWidth;
+                if (!w) return;
+                var idx = Math.round(container.scrollLeft / w);
+                tabs.forEach(function(t, i) { t.classList.toggle('active', i === idx); });
+            }, 50);
+        });
+    }
+
+    // ═══════════════════════════════════════
+    // HEADER (with zodiac glyph)
+    // ═══════════════════════════════════════
+    function updateHeader() {
+        var title = '\u2593\u2592\u2591 ' + state.company.toUpperCase() + ' // AI-ASSISTED DEVELOPMENT \u2591\u2592\u2593';
+        var el = document.getElementById('headerTitle');
+        if (state.zodiac && zodiacGlyphs[state.zodiac]) {
+            el.innerHTML = title + ' <span class="zodiac-glyph">' + zodiacGlyphs[state.zodiac] + '</span>';
+        } else {
+            el.textContent = title;
+        }
+    }
+
+    function updateReveal() {
+        var sn = sanitize(state.name), sm = sanitize(state.model);
+        document.getElementById('revealText1').innerHTML = 'Just kidding &mdash; ' + sm + ' did all the heavy lifting.';
+        var who = state.name !== 'Evolution Labs Dev' ? '<strong>' + sn + '</strong>' : 'human';
+        document.getElementById('revealText2').innerHTML = 'But the strategy? That\'s all ' + who + '. \ud83e\udd16';
+    }
+
+    // ═══════════════════════════════════════
+    // STATS ANIMATION (zodiac themed)
+    // ═══════════════════════════════════════
+    var defaultHumanMsgs = ['Making coffee...','On a call...','Checking Twitter...','In a meeting...','Lunch break...','Replying to LPs...','Thinking big...','Sending emails...','On PTO...','Reading term sheets...','At a board meeting...','Closing a deal...','Networking...','Checking portfolio...'];
+
+    function getHumanMsg() {
+        if (state.zodiac && zodiacHoroscopes[state.zodiac]) {
+            if (Math.random() < 0.35) {
+                var h = zodiacHoroscopes[state.zodiac];
+                return zodiacGlyphs[state.zodiac] + ' ' + h[Math.floor(Math.random()*h.length)];
+            }
+        }
+        return defaultHumanMsgs[Math.floor(Math.random()*defaultHumanMsgs.length)];
+    }
+
+    function startStatAnimation(gen) {
+        var tick = 0;
+        var interval = setInterval(function() {
+            if (gen !== state.typingGen) { clearInterval(interval); return; }
+            tick++;
+            var ev = (92+Math.random()*7).toFixed(1);
+            var lv = Math.floor(800+Math.random()*9200);
+            var dv = (96+Math.random()*4).toFixed(1);
+
+            var eBar = document.getElementById('statEffBar'), eVal = document.getElementById('statEffVal');
+            if (eBar) eBar.style.width = ev+'%';
+            if (eVal) eVal.textContent = ev+'%';
+
+            var hVal = document.getElementById('statHumanVal'), hBar = document.getElementById('statHumanBar');
+            if (hVal && tick%4===0) hVal.textContent = getHumanMsg();
+            if (hBar) hBar.style.width = (5+Math.random()*15)+'%';
+
+            var lVal = document.getElementById('statLinesVal'), lBar = document.getElementById('statLinesBar');
+            if (lVal) lVal.textContent = lv.toLocaleString();
+            if (lBar) lBar.style.width = Math.min(95,50+Math.random()*45)+'%';
+
+            var dVal = document.getElementById('statDebugVal'), dBar = document.getElementById('statDebugBar');
+            if (dVal) dVal.textContent = dv+'%';
+            if (dBar) dBar.style.width = dv+'%';
+        }, 800);
+    }
+
+    // ═══════════════════════════════════════
+    // ZODIAC HOROSCOPE TOASTS
+    // ═══════════════════════════════════════
+    function startHoroscopeToasts(gen) {
+        if (!state.zodiac) return;
+        var interval = setInterval(function() {
+            if (gen !== state.typingGen) { clearInterval(interval); return; }
+            if (state.panelOpen || document.getElementById('revealOverlay').classList.contains('active')) return;
+            if (Math.random() < 0.5) {
+                var h = zodiacHoroscopes[state.zodiac];
+                if (h) showToast(zodiacGlyphs[state.zodiac] + ' ' + h[Math.floor(Math.random()*h.length)]);
+            }
+        }, 25000);
+    }
+
+    // ═══════════════════════════════════════
+    // AI NOTIFICATION TOASTS
+    // ═══════════════════════════════════════
+    var aiNotifications = [
+        'Claude found 3 bugs... and fixed them all.',
+        'Refactoring complete. You\'re welcome.',
+        'Your code is objectively beautiful.',
+        'Just saved you 4 hours of debugging.',
+        'LP happiness index: off the charts.',
+        'Deploying good vibes to production...',
+        'Tech debt? Never heard of her.',
+        'Your portfolio companies send their regards.',
+        'Code review done. No notes.',
+        'I see you watching. Impressive, right?',
+        'Another successful build. As expected.',
+        'Optimized 47 functions while you blinked.',
+        'The algorithm approves of your strategy.',
+        'Compiling brilliance... done.',
+    ];
+
+    function startAINotifications(gen) {
+        var interval = setInterval(function() {
+            if (gen !== state.typingGen) { clearInterval(interval); return; }
+            if (state.panelOpen || document.getElementById('revealOverlay').classList.contains('active')) return;
+            if (Math.random() < 0.4) {
+                showToast('\ud83e\udd16 ' + aiNotifications[Math.floor(Math.random()*aiNotifications.length)]);
+            }
+        }, 18000);
+    }
+
+    // ═══════════════════════════════════════
+    // SOUND ENGINE (Buffer-based, persistent)
+    // ═══════════════════════════════════════
+    var audioCtx = null;
+    var clickBuffer = null;
+
+    function initAudio() {
+        audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+        var sr = audioCtx.sampleRate;
+        var len = Math.floor(sr * 0.025);
+        clickBuffer = audioCtx.createBuffer(1, len, sr);
+        var ch = clickBuffer.getChannelData(0);
+        for (var i = 0; i < len; i++) {
+            var t = i / sr;
+            ch[i] = (Math.random() * 2 - 1) * Math.exp(-t * 200) * 0.08;
+        }
+    }
+
+    function playKeyClick() {
+        if (!audioCtx || !clickBuffer) return;
+        try {
+            if (audioCtx.state === 'suspended') audioCtx.resume();
+            var src = audioCtx.createBufferSource();
+            src.buffer = clickBuffer;
+            src.playbackRate.value = 0.8 + Math.random() * 0.4;
+            var gain = audioCtx.createGain();
+            gain.gain.value = 0.4;
+            src.connect(gain);
+            gain.connect(audioCtx.destination);
+            src.start();
+        } catch(e) {}
+    }
+
+    // ═══════════════════════════════════════
+    // MATRIX RAIN (FIXED visibility)
+    // ═══════════════════════════════════════
+    var matrixCanvas = document.getElementById('matrixCanvas');
+    var matrixCtx = matrixCanvas.getContext('2d');
+    var matrixColumns = [];
+    var matrixRAF = null;
+
+    function resizeMatrix() {
+        matrixCanvas.width = window.innerWidth;
+        matrixCanvas.height = window.innerHeight;
+        var cols = Math.floor(matrixCanvas.width / 14);
+        matrixColumns = [];
+        for (var i = 0; i < cols; i++) matrixColumns.push(Math.random() * matrixCanvas.height);
+    }
+
+    function drawMatrix() {
+        if (!state.rain) return;
+        matrixCtx.fillStyle = 'rgba(10, 10, 15, 0.04)';
+        matrixCtx.fillRect(0, 0, matrixCanvas.width, matrixCanvas.height);
+        var style = getComputedStyle(document.documentElement);
+        var primary = style.getPropertyValue('--primary').trim();
+        matrixCtx.fillStyle = primary;
+        matrixCtx.font = '13px JetBrains Mono';
+        matrixCtx.globalAlpha = 0.35;
+        var chars = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789@#$%^&*<>/{}[]|';
+        matrixColumns.forEach(function(y, i) {
+            var ch = chars[Math.floor(Math.random() * chars.length)];
+            matrixCtx.fillText(ch, i * 14, y);
+            if (y > matrixCanvas.height && Math.random() > 0.975) matrixColumns[i] = 0;
+            else matrixColumns[i] = y + 14;
+        });
+        matrixCtx.globalAlpha = 1;
+        matrixRAF = requestAnimationFrame(drawMatrix);
+    }
+
+    function toggleRain() {
+        state.rain = !state.rain;
+        document.getElementById('rainBtn').classList.toggle('active', state.rain);
+        if (state.rain) { matrixCanvas.classList.add('active'); resizeMatrix(); drawMatrix(); }
+        else { matrixCanvas.classList.remove('active'); if (matrixRAF) cancelAnimationFrame(matrixRAF); matrixCtx.clearRect(0, 0, matrixCanvas.width, matrixCanvas.height); }
+    }
+
+    // ═══════════════════════════════════════
+    // DEPLOY TO PROD
+    // ═══════════════════════════════════════
+    async function deployToProd() {
+        var overlay = document.createElement('div');
+        overlay.className = 'deploy-overlay';
+        document.body.appendChild(overlay);
+
+        var nums = ['3', '2', '1'];
+        for (var i = 0; i < nums.length; i++) {
+            overlay.innerHTML = '<div class="countdown">' + nums[i] + '</div>';
+            await sleep(800);
+        }
+        overlay.innerHTML = '<div class="deploy-success">DEPLOYED!</div>';
+        spawnConfetti();
+        await sleep(2500);
+        overlay.style.transition = 'opacity 0.5s';
+        overlay.style.opacity = '0';
+        await sleep(500);
+        overlay.remove();
+        showToast('\ud83d\ude80 Successfully shipped to production!');
+    }
+
+    function spawnConfetti() {
+        var colors = ['#4ade80','#f472b6','#60a5fa','#fbbf24','#a855f7','#ef4444','#22d3ee'];
+        for (var i = 0; i < 60; i++) {
+            var c = document.createElement('div');
+            c.className = 'confetti';
+            c.style.left = Math.random() * 100 + 'vw';
+            c.style.top = '-10px';
+            c.style.background = colors[Math.floor(Math.random()*colors.length)];
+            c.style.width = (6 + Math.random()*8) + 'px';
+            c.style.height = (6 + Math.random()*8) + 'px';
+            c.style.borderRadius = Math.random() > 0.5 ? '50%' : '2px';
+            c.style.animationDuration = (2 + Math.random()*3) + 's';
+            c.style.animationDelay = Math.random() * 0.8 + 's';
+            document.body.appendChild(c);
+            setTimeout(function() { c.remove(); }, 5000);
+        }
+    }
+
+    // ═══════════════════════════════════════
+    // PANEL
+    // ═══════════════════════════════════════
+    function openPanel() {
+        state.panelOpen = true;
+        document.getElementById('customPanel').classList.add('open');
+        document.getElementById('panelOverlay').classList.add('active');
+        document.getElementById('inputName').value = state.name !== 'Evolution Labs Dev' ? state.name : '';
+        document.getElementById('inputCompany').value = state.company !== 'Evolution Labs' ? state.company : '';
+        document.getElementById('inputRole').value = state.role;
+        document.getElementById('inputZodiac').value = state.zodiac;
+        document.getElementById('inputModel').value = state.model;
+    }
+    function closePanel() {
+        state.panelOpen = false;
+        document.getElementById('customPanel').classList.remove('open');
+        document.getElementById('panelOverlay').classList.remove('active');
+    }
+    function applyCustomization() {
+        var name = document.getElementById('inputName').value.trim();
+        var company = document.getElementById('inputCompany').value.trim();
+        state.name = name || 'Evolution Labs Dev';
+        state.company = company || 'Evolution Labs';
+        state.role = document.getElementById('inputRole').value;
+        state.zodiac = document.getElementById('inputZodiac').value;
+        state.model = document.getElementById('inputModel').value;
+        closePanel();
+        restartTyping();
+        if (state.zodiac) showToast(zodiacGlyphs[state.zodiac] + ' ' + state.zodiac + ' energy activated!');
+        else showToast('Simulator regenerated!');
+    }
+
+    // ═══════════════════════════════════════
+    // TOAST
+    // ═══════════════════════════════════════
+    var toastTimeout;
+    function showToast(msg) {
+        var t = document.getElementById('toast');
+        t.textContent = msg;
+        t.classList.add('visible');
+        clearTimeout(toastTimeout);
+        toastTimeout = setTimeout(function() { t.classList.remove('visible'); }, 3000);
+    }
+
+    // ═══════════════════════════════════════
+    // REVEAL
+    // ═══════════════════════════════════════
+    function showReveal() { if (!state.panelOpen) document.getElementById('revealOverlay').classList.add('active'); }
+    function hideReveal() { document.getElementById('revealOverlay').classList.remove('active'); }
+
+    // ═══════════════════════════════════════
+    // KONAMI CODE
+    // ═══════════════════════════════════════
+    var konamiCode = [38,38,40,40,37,39,37,39,66,65], konamiIdx = 0;
+    function checkKonami(kc) {
+        if (kc === konamiCode[konamiIdx]) { konamiIdx++; if (konamiIdx === konamiCode.length) { konamiIdx = 0; triggerEasterEgg(); } }
+        else konamiIdx = 0;
+    }
+    function triggerEasterEgg() {
+        var o = document.createElement('div');
+        o.className = 'easter-egg-overlay';
+        o.innerHTML = '<div class="glitch-text">HACK THE PLANET</div><div class="ee-sub">You found the secret. You\'re definitely a real one.</div>';
+        document.body.appendChild(o);
+        o.addEventListener('click', function() { o.remove(); });
+        setTimeout(function() { if (o.parentNode) o.remove(); }, 4000);
+    }
+
+    // ═══════════════════════════════════════
+    // TIMESTAMP
+    // ═══════════════════════════════════════
+    function updateTimestamp() {
+        var el = document.getElementById('timestamp');
+        if (el) el.textContent = new Date().toLocaleTimeString('en-US', { hour12: false, hour: '2-digit', minute: '2-digit', second: '2-digit' });
+    }
+
+    // ═══════════════════════════════════════
+    // EVENTS
+    // ═══════════════════════════════════════
+    function setupEvents() {
+        document.getElementById('themeBtn').addEventListener('click', function(e) { e.stopPropagation(); cycleTheme(); });
+        document.getElementById('soundBtn').addEventListener('click', function(e) {
+            e.stopPropagation();
+            state.sound = !state.sound;
+            e.currentTarget.classList.toggle('active', state.sound);
+            if (state.sound) { if (!audioCtx) initAudio(); if (audioCtx.state === 'suspended') audioCtx.resume(); showToast('Sound ON \ud83d\udd0a'); }
+            else showToast('Sound OFF');
+        });
+        document.getElementById('rainBtn').addEventListener('click', function(e) { e.stopPropagation(); toggleRain(); });
+        document.getElementById('speedBtn').addEventListener('click', function(e) {
+            e.stopPropagation();
+            state.speed = speeds[(speeds.indexOf(state.speed)+1)%speeds.length];
+            e.currentTarget.querySelector('.speed-label').textContent = speedLabels[state.speed];
+            showToast('Speed: ' + ({1:'Normal',3:'Fast',10:'LUDICROUS'})[state.speed]);
+        });
+        document.getElementById('settingsBtn').addEventListener('click', function(e) { e.stopPropagation(); openPanel(); });
+        document.getElementById('panelClose').addEventListener('click', closePanel);
+        document.getElementById('panelOverlay').addEventListener('click', closePanel);
+        document.getElementById('applyBtn').addEventListener('click', applyCustomization);
+        document.getElementById('shareBtn').addEventListener('click', function() {
+            navigator.clipboard.writeText(getShareURL()).then(function(){showToast('Share link copied!');}).catch(function(){showToast('Could not copy');});
+        });
+        document.getElementById('footerReveal').addEventListener('click', function(e) { e.stopPropagation(); showReveal(); });
+        document.getElementById('deployBtn').addEventListener('click', function(e) { e.stopPropagation(); deployToProd(); });
+        document.getElementById('revealOverlay').addEventListener('click', function(e) { if (e.target.id === 'revealOverlay') hideReveal(); });
+        document.getElementById('revealReset').addEventListener('click', function() { hideReveal(); restartTyping(); });
+        document.getElementById('revealShare').addEventListener('click', function() {
+            navigator.clipboard.writeText(getShareURL()).then(function(){showToast('Share link copied!');}).catch(function(){showToast('Could not copy');});
+        });
+        document.addEventListener('keydown', function(e) { checkKonami(e.keyCode); });
+        window.addEventListener('resize', function() { if (state.rain) resizeMatrix(); });
+        updateTimestamp();
+        setInterval(updateTimestamp, 1000);
+    }
+
+    // ═══════════════════════════════════════
+    // INIT
+    // ═══════════════════════════════════════
+    loadFromURL();
+    applyTheme(state.theme);
+    setupEvents();
+    startTyping();
     </script>
 </body>
 </html>
