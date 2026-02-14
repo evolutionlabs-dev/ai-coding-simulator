@@ -96,6 +96,90 @@
         }
 
         /* ═══════════════════════════════════════
+           ACCESSIBILITY THEMES (Colorblind-Safe)
+           ═══════════════════════════════════════ */
+
+        /* Red-Green Colorblind (Deuteranopia/Protanopia ~8% of men)
+           Uses blue + orange — maximally distinct on red-green deficient vision */
+        [data-theme="cb-redgreen"] {
+            --primary: #4a9df7;
+            --primary-rgb: 74, 157, 247;
+            --primary-dim: rgba(74, 157, 247, 0.3);
+            --primary-glow: rgba(74, 157, 247, 0.5);
+            --primary-bg: rgba(74, 157, 247, 0.03);
+            --primary-border: rgba(74, 157, 247, 0.3);
+            --primary-hover: rgba(74, 157, 247, 0.6);
+            --bg: #0a0a0f;
+            --bg-panel: rgba(10, 10, 15, 0.95);
+            --kw-color: #f5a623;
+            --fn-color: #4a9df7;
+            --st-color: #c9e2ff;
+            --cm-color: #8a8a8a;
+            --vr-color: #ffcc66;
+            --op-color: #4a9df7;
+        }
+
+        /* Blue-Yellow Colorblind (Tritanopia)
+           Uses magenta/red + cyan — avoids blue-yellow confusion */
+        [data-theme="cb-blueyellow"] {
+            --primary: #e05c8c;
+            --primary-rgb: 224, 92, 140;
+            --primary-dim: rgba(224, 92, 140, 0.3);
+            --primary-glow: rgba(224, 92, 140, 0.5);
+            --primary-bg: rgba(224, 92, 140, 0.03);
+            --primary-border: rgba(224, 92, 140, 0.3);
+            --primary-hover: rgba(224, 92, 140, 0.6);
+            --bg: #0a0a0f;
+            --bg-panel: rgba(10, 10, 15, 0.95);
+            --kw-color: #e05c8c;
+            --fn-color: #33cccc;
+            --st-color: #f7b7cc;
+            --cm-color: #8a8a8a;
+            --vr-color: #66e0e0;
+            --op-color: #e05c8c;
+        }
+
+        /* Monochrome (Achromatopsia — total color blindness)
+           Pure luminance, no hue dependence */
+        [data-theme="cb-mono"] {
+            --primary: #c0c0c0;
+            --primary-rgb: 192, 192, 192;
+            --primary-dim: rgba(192, 192, 192, 0.3);
+            --primary-glow: rgba(192, 192, 192, 0.5);
+            --primary-bg: rgba(192, 192, 192, 0.03);
+            --primary-border: rgba(192, 192, 192, 0.3);
+            --primary-hover: rgba(192, 192, 192, 0.6);
+            --bg: #000000;
+            --bg-panel: rgba(0, 0, 0, 0.95);
+            --kw-color: #ffffff;
+            --fn-color: #b0b0b0;
+            --st-color: #d8d8d8;
+            --cm-color: #606060;
+            --vr-color: #e8e8e8;
+            --op-color: #c0c0c0;
+        }
+
+        /* High Contrast (Low vision — WCAG AAA)
+           Maximum contrast ratios, bold color pairs */
+        [data-theme="high-contrast"] {
+            --primary: #ffff00;
+            --primary-rgb: 255, 255, 0;
+            --primary-dim: rgba(255, 255, 0, 0.3);
+            --primary-glow: rgba(255, 255, 0, 0.5);
+            --primary-bg: rgba(255, 255, 0, 0.03);
+            --primary-border: rgba(255, 255, 0, 0.4);
+            --primary-hover: rgba(255, 255, 0, 0.7);
+            --bg: #000000;
+            --bg-panel: rgba(0, 0, 0, 0.98);
+            --kw-color: #ff6666;
+            --fn-color: #66ffff;
+            --st-color: #66ff66;
+            --cm-color: #999999;
+            --vr-color: #ffaa00;
+            --op-color: #ffff00;
+        }
+
+        /* ═══════════════════════════════════════
            RESET & BASE
            ═══════════════════════════════════════ */
         * { margin: 0; padding: 0; box-sizing: border-box; }
@@ -979,6 +1063,7 @@
             <div class="header-title" id="headerTitle"></div>
             <div class="header-controls">
                 <button class="ctrl-btn" id="themeBtn" title="Change Theme">&#9684;</button>
+                <button class="ctrl-btn" id="accessBtn" title="Accessibility Themes (Colorblind-Safe)">&#9673;</button>
                 <button class="ctrl-btn" id="soundBtn" title="Toggle Keyboard Sounds">&#9835;</button>
                 <button class="ctrl-btn" id="rainBtn" title="Toggle Matrix Rain">&#9618;</button>
                 <button class="ctrl-btn" id="speedBtn" title="Typing Speed"><span class="speed-label">1&times;</span></button>
@@ -1105,6 +1190,9 @@
 
     const themes = ['green', 'purple', 'blue', 'amber', 'evolution'];
     const themeNames = { green: 'Matrix', purple: 'Cyberpunk', blue: 'Ocean', amber: 'Sunset', evolution: 'Evolution' };
+    const accessThemes = ['cb-redgreen', 'cb-blueyellow', 'cb-mono', 'high-contrast'];
+    const accessThemeNames = { 'cb-redgreen': 'Red-Green Safe', 'cb-blueyellow': 'Blue-Yellow Safe', 'cb-mono': 'Monochrome', 'high-contrast': 'High Contrast' };
+    var accessibilityActive = false;
     const speeds = [1, 3, 10];
     const speedLabels = { 1: '1\u00d7', 3: '3\u00d7', 10: '\u221e' };
 
@@ -1172,7 +1260,10 @@
         if (p.has('r')) state.role = p.get('r');
         if (p.has('z')) state.zodiac = p.get('z');
         if (p.has('m')) state.model = p.get('m');
-        if (p.has('t') && themes.includes(p.get('t'))) state.theme = p.get('t');
+        if (p.has('t') && (themes.includes(p.get('t')) || accessThemes.includes(p.get('t')))) {
+            state.theme = p.get('t');
+            if (accessThemes.includes(p.get('t'))) accessibilityActive = true;
+        }
     }
 
     function getShareURL() {
@@ -1183,6 +1274,7 @@
         if (state.zodiac) p.set('z', state.zodiac);
         if (state.model && state.model !== 'Claude') p.set('m', state.model);
         if (state.theme !== 'green') p.set('t', state.theme);
+        if (accessibilityActive) p.set('a', '1');
         var base = window.location.origin + window.location.pathname;
         var qs = p.toString();
         return qs ? base + '?' + qs : base;
@@ -1193,9 +1285,34 @@
     // ═══════════════════════════════════════
     function applyTheme(t) { state.theme = t; document.body.setAttribute('data-theme', t); }
     function cycleTheme() {
+        if (accessibilityActive) {
+            accessibilityActive = false;
+            document.getElementById('accessBtn').classList.remove('active');
+        }
         var next = themes[(themes.indexOf(state.theme) + 1) % themes.length];
+        if (themes.indexOf(state.theme) === -1) next = themes[0];
         applyTheme(next);
         showToast('Theme: ' + themeNames[next]);
+    }
+    function cycleAccessTheme() {
+        var currentIdx = accessThemes.indexOf(state.theme);
+        if (!accessibilityActive || currentIdx === -1) {
+            accessibilityActive = true;
+            document.getElementById('accessBtn').classList.add('active');
+            var next = accessThemes[0];
+            applyTheme(next);
+            showToast('Accessibility: ' + accessThemeNames[next]);
+        } else if (currentIdx === accessThemes.length - 1) {
+            accessibilityActive = false;
+            document.getElementById('accessBtn').classList.remove('active');
+            var restore = themes[0];
+            applyTheme(restore);
+            showToast('Theme: ' + themeNames[restore]);
+        } else {
+            var next = accessThemes[currentIdx + 1];
+            applyTheme(next);
+            showToast('Accessibility: ' + accessThemeNames[next]);
+        }
     }
 
     // ═══════════════════════════════════════
@@ -1777,6 +1894,7 @@
     // ═══════════════════════════════════════
     function setupEvents() {
         document.getElementById('themeBtn').addEventListener('click', function(e) { e.stopPropagation(); cycleTheme(); });
+        document.getElementById('accessBtn').addEventListener('click', function(e) { e.stopPropagation(); cycleAccessTheme(); });
         document.getElementById('soundBtn').addEventListener('click', function(e) {
             e.stopPropagation();
             state.sound = !state.sound;
@@ -1817,6 +1935,7 @@
     loadFromURL();
     applyTheme(state.theme);
     setupEvents();
+    if (accessibilityActive) document.getElementById('accessBtn').classList.add('active');
     startTyping();
     </script>
 </body>
