@@ -4,7 +4,10 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
     <title>AI-Assisted Development Simulator | Evolution Labs</title>
-    <link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;600&family=Inter:wght@400;600&display=swap" rel="stylesheet">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;600&family=Inter:wght@400;600&display=swap" rel="stylesheet" media="print" onload="this.media='all'">
+    <noscript><link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;600&family=Inter:wght@400;600&display=swap" rel="stylesheet"></noscript>
     <style>
         /* ═══════════════════════════════════════
            THEME SYSTEM (CSS Custom Properties)
@@ -1932,11 +1935,17 @@
     // ═══════════════════════════════════════
     // INIT
     // ═══════════════════════════════════════
-    loadFromURL();
-    applyTheme(state.theme);
-    setupEvents();
-    if (accessibilityActive) document.getElementById('accessBtn').classList.add('active');
-    startTyping();
+    try {
+        loadFromURL();
+        applyTheme(state.theme);
+        setupEvents();
+        if (accessibilityActive) document.getElementById('accessBtn').classList.add('active');
+        startTyping();
+    } catch(e) {
+        console.error('Init error:', e);
+        // Fallback: ensure windows are built even if something else failed
+        try { startTyping(); } catch(e2) { console.error('Fallback failed:', e2); }
+    }
     </script>
 </body>
 </html>
