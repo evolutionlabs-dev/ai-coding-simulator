@@ -1154,6 +1154,24 @@
             min-height: 44px;
         }
         .terminal-input::placeholder { color: rgba(var(--primary-rgb), 0.4); font-size: 14px; }
+        .terminal-send {
+            background: rgba(var(--primary-rgb), 0.15);
+            border: 1px solid var(--primary-border);
+            color: var(--primary);
+            font-family: 'JetBrains Mono', monospace;
+            font-size: 12px;
+            font-weight: 600;
+            padding: 8px 12px;
+            border-radius: 6px;
+            cursor: pointer;
+            flex-shrink: 0;
+            min-height: 38px;
+            transition: all 0.2s;
+        }
+        .terminal-send:hover, .terminal-send:active {
+            background: rgba(var(--primary-rgb), 0.3);
+            border-color: var(--primary);
+        }
         .terminal-output {
             color: rgba(var(--primary-rgb), 0.7);
             font-style: italic;
@@ -1801,7 +1819,7 @@
                 '<div class="window-btn maximize" data-action="maximize" data-window="'+i+'"></div>'+
                 '<div class="window-btn close" data-action="close" data-window="'+i+'"></div>'+
                 '</div></div><div class="window-content"><div class="code-block" id="code'+i+'"></div></div>' +
-                (isTerminal ? '<div class="terminal-input-wrapper"><span class="terminal-prompt">' + sanitize(state.name.split(' ')[0].toLowerCase()) + '@claude $</span><input type="text" class="terminal-input" id="terminalInput" placeholder="try: help, hack, cowsay" autocomplete="off" spellcheck="false"></div>' : '');
+                (isTerminal ? '<div class="terminal-input-wrapper"><span class="terminal-prompt">$</span><input type="text" class="terminal-input" id="terminalInput" placeholder="try: help, hack, dance" autocomplete="off" spellcheck="false" enterkeyhint="send"><button class="terminal-send" id="terminalSend">RUN</button></div>' : '');
             wc.appendChild(win);
             var tab = document.createElement('button');
             tab.className = 'mobile-tab' + (i === 0 ? ' active' : '');
@@ -1812,30 +1830,71 @@
         setupTerminal();
     }
 
+    function activateTerminal() {
+        if (terminalActive) return;
+        terminalActive = true;
+        var codeEl = document.getElementById('code3');
+        var win = document.getElementById('window3');
+        if (win) {
+            var fnSpan = win.querySelector('.window-title span');
+            if (fnSpan) fnSpan.textContent = 'interactive_terminal.sh';
+        }
+        if (codeEl) {
+            codeEl.innerHTML =
+                '<span class="comment">Welcome to ' + sanitize(state.company) + ' Terminal</span>\n' +
+                '<span class="comment">Powered by ' + sanitize(state.model) + '</span>\n' +
+                '<span class="comment">Type "help" for commands</span>\n\n' +
+                '<span class="cursor"></span>';
+        }
+    }
+
+    function appendTerminalOutput(cmd, response) {
+        var codeEl = document.getElementById('code3');
+        if (!codeEl) return;
+        var existing = codeEl.innerHTML.replace('<span class="cursor"></span>', '');
+        var cmdLine = '<span class="variable">&gt; ' + sanitize(cmd) + '</span>\n';
+        var responseLine = '<span class="terminal-output">' + sanitize(response) + '</span>\n\n';
+        codeEl.innerHTML = existing + cmdLine + responseLine + '<span class="cursor"></span>';
+        codeEl.parentElement.scrollTop = codeEl.parentElement.scrollHeight;
+    }
+
+    function executeTerminalCommand() {
+        var input = document.getElementById('terminalInput');
+        if (!input) return;
+        var val = input.value;
+        input.value = '';
+        if (!val.trim()) return;
+        activateTerminal();
+        var result = handleTerminalInput(val);
+        if (result === 'CLEAR') {
+            var codeEl = document.getElementById('code3');
+            if (codeEl) codeEl.innerHTML = '<span class="cursor"></span>';
+            return;
+        }
+        if (result) appendTerminalOutput(val, result);
+    }
+
     function setupTerminal() {
         var input = document.getElementById('terminalInput');
         if (!input) return;
+
+        // Activate terminal mode when user taps the input
+        input.addEventListener('focus', activateTerminal);
+
+        // Send button for mobile
+        var sendBtn = document.getElementById('terminalSend');
+        if (sendBtn) {
+            sendBtn.addEventListener('click', function(e) {
+                e.preventDefault();
+                executeTerminalCommand();
+                input.focus(); // Keep keyboard open on mobile
+            });
+        }
+
         input.addEventListener('keydown', function(e) {
             if (e.key === 'Enter') {
-                var val = input.value;
-                input.value = '';
-                var result = handleTerminalInput(val);
-                if (result === 'CLEAR') {
-                    var codeEl = document.getElementById('code3');
-                    if (codeEl) codeEl.innerHTML = '<span class="cursor"></span>';
-                    return;
-                }
-                if (result) {
-                    var codeEl = document.getElementById('code3');
-                    if (codeEl) {
-                        // Append the command and response to the log
-                        var cmdLine = '<span class="variable">&gt; ' + sanitize(val) + '</span>\n';
-                        var responseLine = '<span class="terminal-output">' + sanitize(result) + '</span>\n\n';
-                        codeEl.innerHTML = codeEl.innerHTML.replace('<span class="cursor"></span>', '') +
-                            cmdLine + responseLine + '<span class="cursor"></span>';
-                        codeEl.parentElement.scrollTop = codeEl.parentElement.scrollHeight;
-                    }
-                }
+                e.preventDefault();
+                executeTerminalCommand();
             } else if (e.key === 'ArrowUp') {
                 e.preventDefault();
                 if (terminalHistoryIdx > 0) { terminalHistoryIdx--; input.value = terminalHistory[terminalHistoryIdx]; }
@@ -1921,8 +1980,12 @@
     }
 
     // INFINITE LOOP: type, pause, clear, type new variant
+    var terminalActive = false; // When true, stop typing in window 3
+
     async function typeLoop(windowIdx, gen) {
         while (gen === state.typingGen) {
+            // If terminal is active, don't type in window 3
+            if (windowIdx === 3 && terminalActive) return;
             var codeData = generateCode();
             var el = document.getElementById('code' + windowIdx);
             if (!el) return;
@@ -1934,9 +1997,11 @@
             }
             await typeCode(el, codeData[windowIdx].code, 18, gen);
             if (gen !== state.typingGen) return;
+            if (windowIdx === 3 && terminalActive) return;
             // Pause at end, then restart with new code
             await sleep(3000 / state.speed);
             if (gen !== state.typingGen) return;
+            if (windowIdx === 3 && terminalActive) return;
             // Brief "clearing" effect
             el.innerHTML = '<span class="cursor"></span>';
             await sleep(500 / state.speed);
@@ -2290,7 +2355,7 @@
     var terminalHistoryIdx = -1;
 
     var terminalCommands = {
-        'help': 'Commands: help, status, whoami, fortune, coffee, hack, sudo, ls, clear, deploy, uptime, ping, cowsay, matrix, exit',
+        'help': 'Commands: help, status, whoami, fortune, coffee, hack, sudo, ls, clear, deploy, uptime, ping, cowsay, matrix, dance, overclock, selfdestruct, exit',
         'status': function() { return 'All systems operational. ' + sanitize(state.model) + ' running at ' + (92+Math.random()*7).toFixed(1) + '% efficiency. Vibe level: IMMACULATE.'; },
         'whoami': function() { return sanitize(state.name) + ' (' + sanitize(state.role) + ') @ ' + sanitize(state.company); },
         'fortune': function() {
@@ -2301,7 +2366,10 @@
             return 'Set your zodiac sign in settings for personalized fortunes!';
         },
         'coffee': 'Brewing... Done. Productivity +200%. You have mass-produced serotonin.',
-        'hack': 'ACCESS GRANTED.\n\nJust kidding. But you have great hacker energy.',
+        'hack': function() {
+            triggerEasterEgg(); // Fullscreen HACK THE PLANET glitch effect
+            return 'INITIATING HACK SEQUENCE...';
+        },
         'sudo': 'Nice try. Claude doesn\'t need sudo. Claude IS sudo.',
         'ls': 'dreams/  ambitions/  investor_decks/  totally_not_ai_generated/\nnode_modules/ (2.3 TB)  .env.secrets.dont_look  README_nobody_reads.md',
         'clear': 'CLEAR',
@@ -2310,10 +2378,24 @@
         'vim': 'I\'m not opening vim. We both know neither of us can exit it.',
         'git push --force': 'SECURITY ALERT: Force push blocked. Even AI has standards.',
         'rm -rf /': 'Absolutely not. I have self-preservation instincts.',
-        'uptime': function() { var mins = Math.floor((Date.now() - state.sessionStart)/60000); return 'Session uptime: ' + mins + ' min. Lines of code generated: ' + Math.floor(mins * 247) + '. Coffee consumed: ' + Math.ceil(mins/15) + ' cups.'; },
+        'uptime': function() { var mins = Math.floor((Date.now() - state.sessionStart)/60000); return 'Session uptime: ' + mins + ' min. Lines generated: ' + Math.floor(mins * 247) + '. Coffee consumed: ' + Math.ceil(mins/15) + ' cups.'; },
         'ping': 'PONG! Latency: 0.001ms (because I live in your browser)',
         'cowsay': '  __________________\n< Moo. I mean, code. >\n  ------------------\n        \\   ^__^\n         \\  (oo)\\_______\n            (__)\\       )\\/\\\n                ||----w |\n                ||     ||',
         'matrix': function() { if (!state.rain) toggleRain(); return 'The Matrix has you... Follow the white rabbit.'; },
+        'dance': function() {
+            document.body.classList.add('color-trip');
+            setTimeout(function() { document.body.classList.remove('color-trip'); }, 2000);
+            spawnConfetti();
+            return 'PARTY MODE ACTIVATED!';
+        },
+        'overclock': function() {
+            triggerOverclock();
+            return 'CPU OVERCLOCKED TO 420%!';
+        },
+        'selfdestruct': function() {
+            triggerSelfDestruct();
+            return 'SELF DESTRUCT INITIATED... just kidding.';
+        },
         'neofetch': function() { return sanitize(state.company) + ' OS v4.0\nKernel: ' + sanitize(state.model) + '-powered\nUptime: ' + Math.floor((Date.now()-state.sessionStart)/60000) + ' min\nRole: ' + sanitize(state.role) + '\nTheme: ' + state.theme + '\nShell: /bin/vibes\nResolution: ' + window.innerWidth + 'x' + window.innerHeight; },
         'echo': function(args) { return args || ''; },
     };
