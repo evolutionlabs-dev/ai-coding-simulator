@@ -1532,6 +1532,7 @@
             <div style="margin-top: 8px;"></div>
             <button class="panel-btn apply-btn" id="applyBtn">&#9654; APPLY &amp; REGENERATE</button>
             <button class="panel-btn share-btn" id="shareBtn">&#128279; COPY SHARE LINK</button>
+            <button class="panel-btn share-btn" id="resetBtn">&#8635; RESET ACHIEVEMENTS</button>
         </div>
     </div>
 
@@ -2381,7 +2382,7 @@
     var terminalHistoryIdx = -1;
 
     var terminalCommands = {
-        'help': 'Commands: help, status, whoami, fortune, coffee, hack, sudo, ls, clear, deploy, uptime, ping, cowsay, matrix, dance, overclock, selfdestruct, exit',
+        'help': 'Commands: help, status, whoami, fortune, coffee, hack, sudo, ls, clear, deploy, uptime, ping, cowsay, matrix, dance, overclock, selfdestruct, reset, exit',
         'status': function() { return 'All systems operational. ' + sanitize(state.model) + ' running at ' + (92+Math.random()*7).toFixed(1) + '% efficiency. Vibe level: IMMACULATE.'; },
         'whoami': function() { return sanitize(state.name) + ' (' + sanitize(state.role) + ') @ ' + sanitize(state.company); },
         'fortune': function() {
@@ -2400,6 +2401,15 @@
         'ls': 'dreams/  ambitions/  investor_decks/  totally_not_ai_generated/\nnode_modules/ (2.3 TB)  .env.secrets.dont_look  README_nobody_reads.md',
         'clear': 'CLEAR',
         'deploy': function() { deployToProd(); return 'Initiating deployment sequence...'; },
+        'reset': function() {
+            state.achievements = {};
+            state.deployCount = 0;
+            state.themeChanges = 0;
+            state.themesUsed = [];
+            saveToLocalStorage();
+            updateTrophyCount();
+            return 'All achievements and stats have been reset. Fresh start!';
+        },
         'exit': 'There is no exit. Only more code. You are one with the terminal now.',
         'vim': 'I\'m not opening vim. We both know neither of us can exit it.',
         'git push --force': 'SECURITY ALERT: Force push blocked. Even AI has standards.',
@@ -2934,6 +2944,15 @@
         document.getElementById('applyBtn').addEventListener('click', applyCustomization);
         document.getElementById('shareBtn').addEventListener('click', function() {
             navigator.clipboard.writeText(getShareURL()).then(function(){showToast('Share link copied!'); unlockAchievement('shared');}).catch(function(){showToast('Could not copy');});
+        });
+        document.getElementById('resetBtn').addEventListener('click', function() {
+            state.achievements = {};
+            state.deployCount = 0;
+            state.themeChanges = 0;
+            state.themesUsed = [];
+            saveToLocalStorage();
+            updateTrophyCount();
+            showToast('Achievements reset! Fresh start.');
         });
         // Footer: single tap reveals, triple tap triggers easter egg
         var footerTapTimer2 = null; var footerClicks = 0;
