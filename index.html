@@ -3017,8 +3017,8 @@
 
     // 2. SHAKE PHONE — Earthquake effect (Device Motion API)
     var lastShakeTime = 0;
-    var shakeThreshold = 25;
-    var lastAccel = { x: 0, y: 0, z: 0 };
+    var shakeThreshold = 15;
+    var lastAccel = { x: null, y: null, z: null };
     var shakeListenerAdded = false;
 
     function addShakeListener() {
@@ -3026,7 +3026,12 @@
         shakeListenerAdded = true;
         window.addEventListener('devicemotion', function(e) {
             var a = e.accelerationIncludingGravity;
-            if (!a) return;
+            if (!a || a.x == null) return;
+            // Skip the first reading to establish baseline
+            if (lastAccel.x === null) {
+                lastAccel = { x: a.x, y: a.y, z: a.z };
+                return;
+            }
             var dx = Math.abs(a.x - lastAccel.x);
             var dy = Math.abs(a.y - lastAccel.y);
             var dz = Math.abs(a.z - lastAccel.z);
@@ -3051,16 +3056,19 @@
     // iOS 13+ requires permission request; other platforms just work
     if (window.DeviceMotionEvent) {
         if (typeof DeviceMotionEvent.requestPermission === 'function') {
-            // iOS: request permission on first meaningful tap (not raw touchstart)
-            var motionPermRequested = false;
-            document.addEventListener('click', function iosMotionReq() {
-                if (motionPermRequested) return;
-                motionPermRequested = true;
+            // iOS: keep trying on each tap until permission is granted
+            var motionPermGranted = false;
+            function requestMotionPermission() {
+                if (motionPermGranted) return;
                 DeviceMotionEvent.requestPermission().then(function(state) {
-                    if (state === 'granted') addShakeListener();
+                    if (state === 'granted') {
+                        motionPermGranted = true;
+                        addShakeListener();
+                        document.removeEventListener('click', requestMotionPermission);
+                    }
                 }).catch(function() {});
-                document.removeEventListener('click', iosMotionReq);
-            }, { once: true });
+            }
+            document.addEventListener('click', requestMotionPermission);
         } else {
             addShakeListener();
         }
