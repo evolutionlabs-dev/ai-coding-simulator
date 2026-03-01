@@ -994,29 +994,34 @@
         }
 
         /* ═══════════════════════════════════════
-           RESPONSIVE — MOBILE
+           RESPONSIVE — MOBILE (Complete Rewrite)
            ═══════════════════════════════════════ */
         @media (max-width: 768px) {
+            /* Let the page scroll vertically */
             body { overflow-y: auto; }
 
-            /* Calm down animations on mobile */
-            .container::before { animation: none; opacity: 0.5; }
+            /* Kill ALL constant animations — clean, stable screen */
+            .container::before { animation: none; opacity: 0.3; }
             .zodiac-glyph { animation: none; }
             .deploy-btn { animation: none; }
-            .cpu-bar::after { animation: cpu-pulse 3s ease-in-out infinite; }
+            .cpu-bar::after { animation: none; width: 72%; }
 
+            /* SOLID background so matrix rain doesn't bleed through */
             .container {
-                padding: 10px;
-                gap: 8px;
+                padding: 8px;
+                gap: 6px;
                 height: auto;
                 min-height: 100vh;
                 min-height: 100dvh;
+                background: var(--bg);
             }
 
+            /* Compact header */
             .header {
                 flex-wrap: wrap;
                 padding: 8px 10px;
                 gap: 6px;
+                background: rgba(10, 10, 15, 0.95);
             }
             .header-title {
                 font-size: 9px;
@@ -1024,6 +1029,8 @@
                 width: 100%;
                 text-align: center;
                 order: -1;
+                white-space: normal;
+                line-height: 1.4;
             }
             .header-controls {
                 width: 100%;
@@ -1035,49 +1042,73 @@
             .ctrl-divider { display: none; }
             .timestamp { display: none; }
             .trophy-count { font-size: 10px; }
+            .cpu-indicator { font-size: 9px; }
+            .cpu-bar { width: 30px; }
+            .music-visualizer { display: none; }
 
+            /* Tab bar to switch windows */
             .mobile-tabs { display: flex; }
 
+            /* Horizontally scrolling windows */
             .windows-container {
                 display: flex;
                 overflow-x: auto;
                 scroll-snap-type: x mandatory;
                 -webkit-overflow-scrolling: touch;
                 gap: 0;
-                min-height: 45vh;
-                flex: 1 1 auto;
+                height: 50vh;
+                flex: none;
             }
-
             .window {
                 min-width: 100%;
-                min-height: 45vh;
+                height: 50vh;
                 flex-shrink: 0;
                 scroll-snap-align: start;
-                border-radius: 8px;
+                border-radius: 6px;
+                background: rgba(10, 10, 15, 0.98);
             }
             .window.maximized { position: relative; inset: auto; }
 
+            /* Compact stats */
             .stats-container { grid-template-columns: 1fr 1fr; gap: 6px; }
-            .stat-box { padding: 8px; }
+            .stat-box { padding: 8px; background: rgba(10, 10, 15, 0.95); }
             .stat-label { font-size: 9px; }
             .stat-value { font-size: 11px; }
             .stat-bar { height: 4px; margin-bottom: 4px; }
 
+            /* Settings panel full width */
             .custom-panel { width: 100%; right: -100%; }
 
+            /* Reveal overlay */
             .reveal-message { padding: 24px 20px; margin: 10px; }
             .reveal-message h1 { font-size: 24px; }
             .reveal-message p { font-size: 14px; }
             .reveal-cta { padding: 12px 20px; font-size: 12px; }
             .reveal-row { flex-direction: column; }
 
+            /* Footer */
             .footer { font-size: 10px; padding: 6px; flex-wrap: wrap; justify-content: center; }
             .deploy-overlay { font-size: 50px; }
+
+            /* Achievement popup — drop from top, full width */
+            .achievement-popup {
+                top: 10px;
+                right: 10px;
+                left: 10px;
+                max-width: none;
+                transform: translateY(-200px);
+            }
+            .achievement-popup.show { transform: translateY(0); }
+            .shortcuts-overlay .shortcuts-panel { padding: 20px; }
+
+            /* Matrix rain — hidden on mobile since bg is solid */
+            #matrixCanvas { display: none; }
         }
 
         @media (max-width: 420px) {
             .stats-container { grid-template-columns: 1fr; }
-            .glitch-text { font-size: 32px; }
+            .glitch-text { font-size: 28px; }
+            .ee-sub { font-size: 14px; }
         }
 
         /* ═══════════════════════════════════════
@@ -1397,18 +1428,8 @@
             .firework { display: none; }
         }
 
-        @media (max-width: 768px) {
-            .achievement-popup {
-                top: 10px;
-                right: 10px;
-                left: 10px;
-                max-width: none;
-                transform: translateY(-200px);
-            }
-            .achievement-popup.show { transform: translateY(0); }
-            .shortcuts-overlay .shortcuts-panel { padding: 20px; }
-            .music-visualizer { display: none; }
-        }
+        /* Mobile overrides for new features are consolidated
+           in the main mobile media query above */
     </style>
 </head>
 <body data-theme="green">
