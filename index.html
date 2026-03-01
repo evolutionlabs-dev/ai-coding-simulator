@@ -3041,15 +3041,25 @@
         });
     }
 
+    // Suppress iOS "Shake to Undo" dialog so shake detection works cleanly
+    window.addEventListener('beforeinput', function(e) {
+        if (e.inputType === 'historyUndo' || e.inputType === 'historyRedo') {
+            e.preventDefault();
+        }
+    });
+
     // iOS 13+ requires permission request; other platforms just work
     if (window.DeviceMotionEvent) {
         if (typeof DeviceMotionEvent.requestPermission === 'function') {
-            // iOS: request on first user interaction
-            document.addEventListener('touchstart', function iosMotionReq() {
+            // iOS: request permission on first meaningful tap (not raw touchstart)
+            var motionPermRequested = false;
+            document.addEventListener('click', function iosMotionReq() {
+                if (motionPermRequested) return;
+                motionPermRequested = true;
                 DeviceMotionEvent.requestPermission().then(function(state) {
                     if (state === 'granted') addShakeListener();
                 }).catch(function() {});
-                document.removeEventListener('touchstart', iosMotionReq);
+                document.removeEventListener('click', iosMotionReq);
             }, { once: true });
         } else {
             addShakeListener();
