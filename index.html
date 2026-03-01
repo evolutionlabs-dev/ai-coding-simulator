@@ -4,6 +4,16 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
     <title>AI-Assisted Development Simulator | Evolution Labs</title>
+    <meta name="description" content="Watch AI build your startup in real-time. An interactive simulator showcasing AI-assisted development with customizable themes, zodiac personalities, and hidden easter eggs.">
+    <meta property="og:title" content="AI-Assisted Development Simulator | Evolution Labs">
+    <meta property="og:description" content="Watch AI build your startup in real-time. Customize your role, zodiac sign, and watch Claude write code for you.">
+    <meta property="og:type" content="website">
+    <meta property="og:url" content="https://evolutionlabs-dev.github.io/ai-coding-simulator/">
+    <meta name="twitter:card" content="summary_large_image">
+    <meta name="twitter:title" content="AI-Assisted Development Simulator">
+    <meta name="twitter:description" content="Watch AI build your startup in real-time. An interactive development simulator by Evolution Labs.">
+    <meta name="theme-color" content="#4ade80">
+    <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>🤖</text></svg>">
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;600&family=Inter:wght@400;600&display=swap" rel="stylesheet" media="print" onload="this.media='all'">
@@ -1056,6 +1066,265 @@
             .stats-container { grid-template-columns: 1fr; }
             .glitch-text { font-size: 32px; }
         }
+
+        /* ═══════════════════════════════════════
+           INTERACTIVE TERMINAL
+           ═══════════════════════════════════════ */
+        .terminal-input-wrapper {
+            display: flex;
+            align-items: center;
+            border-top: 1px solid var(--primary-border);
+            padding: 8px 12px;
+            background: rgba(var(--primary-rgb), 0.03);
+            flex-shrink: 0;
+        }
+        .terminal-prompt {
+            color: var(--primary);
+            font-size: 12px;
+            margin-right: 8px;
+            opacity: 0.8;
+            white-space: nowrap;
+        }
+        .terminal-input {
+            flex: 1;
+            background: transparent;
+            border: none;
+            color: var(--primary);
+            font-family: 'JetBrains Mono', monospace;
+            font-size: 12px;
+            outline: none;
+            caret-color: var(--primary);
+        }
+        .terminal-input::placeholder { color: rgba(var(--primary-rgb), 0.25); }
+        .terminal-output {
+            color: rgba(var(--primary-rgb), 0.7);
+            font-style: italic;
+        }
+
+        /* ═══════════════════════════════════════
+           ACHIEVEMENT SYSTEM
+           ═══════════════════════════════════════ */
+        .achievement-popup {
+            position: fixed;
+            top: 80px;
+            right: 20px;
+            background: var(--bg-panel);
+            border: 1px solid var(--primary);
+            border-radius: 10px;
+            padding: 14px 20px;
+            z-index: 8000;
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            transform: translateX(400px);
+            transition: transform 0.5s cubic-bezier(0.68, -0.55, 0.265, 1.55);
+            box-shadow: 0 0 30px rgba(var(--primary-rgb), 0.3);
+            max-width: 320px;
+        }
+        .achievement-popup.show { transform: translateX(0); }
+        .achievement-icon { font-size: 28px; flex-shrink: 0; }
+        .achievement-info { min-width: 0; }
+        .achievement-label {
+            font-size: 9px;
+            letter-spacing: 2px;
+            opacity: 0.6;
+            margin-bottom: 2px;
+        }
+        .achievement-name {
+            font-size: 14px;
+            font-weight: 600;
+            color: var(--primary);
+            text-shadow: 0 0 10px var(--primary-glow);
+        }
+        .achievement-desc {
+            font-size: 11px;
+            opacity: 0.7;
+            margin-top: 2px;
+        }
+        .achievement-counter {
+            font-size: 10px;
+            opacity: 0.5;
+            letter-spacing: 1px;
+            margin-left: auto;
+            flex-shrink: 0;
+        }
+
+        /* Achievement badge in header */
+        .trophy-count {
+            font-size: 11px;
+            display: flex;
+            align-items: center;
+            gap: 4px;
+            opacity: 0.7;
+            cursor: pointer;
+            transition: opacity 0.2s;
+        }
+        .trophy-count:hover { opacity: 1; }
+
+        /* ═══════════════════════════════════════
+           KEYBOARD SHORTCUTS OVERLAY
+           ═══════════════════════════════════════ */
+        .shortcuts-overlay {
+            position: fixed;
+            inset: 0;
+            background: rgba(0, 0, 0, 0.85);
+            display: none;
+            justify-content: center;
+            align-items: center;
+            z-index: 9500;
+            backdrop-filter: blur(8px);
+            padding: 20px;
+        }
+        .shortcuts-overlay.active { display: flex; }
+        .shortcuts-panel {
+            background: var(--bg-panel);
+            border: 1px solid var(--primary-border);
+            border-radius: 12px;
+            padding: 30px;
+            max-width: 480px;
+            width: 100%;
+            animation: reveal-pop 0.4s cubic-bezier(0.68, -0.55, 0.265, 1.55);
+        }
+        .shortcuts-panel h2 {
+            font-size: 16px;
+            margin-bottom: 20px;
+            text-shadow: 0 0 10px var(--primary-glow);
+            letter-spacing: 2px;
+        }
+        .shortcut-row {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 8px 0;
+            border-bottom: 1px solid rgba(var(--primary-rgb), 0.1);
+            font-size: 12px;
+        }
+        .shortcut-row:last-child { border-bottom: none; }
+        .shortcut-key {
+            background: rgba(var(--primary-rgb), 0.15);
+            border: 1px solid var(--primary-border);
+            border-radius: 4px;
+            padding: 3px 8px;
+            font-size: 11px;
+            font-weight: 600;
+            letter-spacing: 1px;
+        }
+        .shortcut-action { opacity: 0.7; }
+
+        /* ═══════════════════════════════════════
+           FIREWORK PARTICLES
+           ═══════════════════════════════════════ */
+        .firework {
+            position: fixed;
+            width: 4px;
+            height: 4px;
+            border-radius: 50%;
+            z-index: 5002;
+            pointer-events: none;
+        }
+        .firework-trail {
+            position: fixed;
+            width: 2px;
+            height: 2px;
+            border-radius: 50%;
+            z-index: 5001;
+            pointer-events: none;
+            opacity: 0.6;
+        }
+
+        /* ═══════════════════════════════════════
+           MUSIC VISUALIZER
+           ═══════════════════════════════════════ */
+        .music-visualizer {
+            display: flex;
+            align-items: flex-end;
+            gap: 2px;
+            height: 16px;
+            opacity: 0;
+            transition: opacity 0.3s;
+        }
+        .music-visualizer.active { opacity: 1; }
+        .music-bar {
+            width: 3px;
+            background: var(--primary);
+            border-radius: 1px;
+            transition: height 0.1s ease;
+        }
+
+        /* ═══════════════════════════════════════
+           ACHIEVEMENTS GALLERY
+           ═══════════════════════════════════════ */
+        .achievements-gallery {
+            position: fixed;
+            inset: 0;
+            background: rgba(0, 0, 0, 0.9);
+            display: none;
+            justify-content: center;
+            align-items: center;
+            z-index: 9000;
+            backdrop-filter: blur(8px);
+            padding: 20px;
+        }
+        .achievements-gallery.active { display: flex; }
+        .achievements-grid-panel {
+            background: var(--bg-panel);
+            border: 1px solid var(--primary-border);
+            border-radius: 12px;
+            padding: 30px;
+            max-width: 600px;
+            width: 100%;
+            max-height: 80vh;
+            overflow-y: auto;
+            animation: reveal-pop 0.4s cubic-bezier(0.68, -0.55, 0.265, 1.55);
+        }
+        .achievements-grid-panel h2 {
+            font-size: 16px;
+            margin-bottom: 20px;
+            text-shadow: 0 0 10px var(--primary-glow);
+            letter-spacing: 2px;
+        }
+        .achievements-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(160px, 1fr));
+            gap: 10px;
+        }
+        .achievement-card {
+            background: rgba(var(--primary-rgb), 0.05);
+            border: 1px solid var(--primary-border);
+            border-radius: 8px;
+            padding: 12px;
+            text-align: center;
+            transition: all 0.2s;
+        }
+        .achievement-card.unlocked {
+            border-color: var(--primary);
+            box-shadow: 0 0 12px rgba(var(--primary-rgb), 0.2);
+        }
+        .achievement-card.locked { opacity: 0.35; }
+        .achievement-card .ach-icon { font-size: 24px; margin-bottom: 6px; }
+        .achievement-card .ach-name { font-size: 11px; font-weight: 600; }
+        .achievement-card .ach-desc { font-size: 9px; opacity: 0.6; margin-top: 4px; }
+
+        /* ═══════════════════════════════════════
+           REDUCED MOTION (Accessibility)
+           ═══════════════════════════════════════ */
+        @media (prefers-reduced-motion: reduce) {
+            *, *::before, *::after {
+                animation-duration: 0.01ms !important;
+                animation-iteration-count: 1 !important;
+                transition-duration: 0.01ms !important;
+            }
+            .zodiac-glyph { animation: none; }
+            #matrixCanvas { display: none; }
+            .confetti { display: none; }
+            .firework { display: none; }
+        }
+
+        @media (max-width: 768px) {
+            .achievement-popup { right: 10px; left: 10px; max-width: none; }
+            .shortcuts-overlay .shortcuts-panel { padding: 20px; }
+            .music-visualizer { display: none; }
+        }
     </style>
 </head>
 <body data-theme="green">
@@ -1071,7 +1340,17 @@
                 <button class="ctrl-btn" id="rainBtn" title="Toggle Matrix Rain">&#9618;</button>
                 <button class="ctrl-btn" id="speedBtn" title="Typing Speed"><span class="speed-label">1&times;</span></button>
                 <div class="ctrl-divider"></div>
+                <button class="ctrl-btn" id="musicBtn" title="Toggle Ambient Music">&#9836;</button>
                 <button class="ctrl-btn" id="settingsBtn" title="Customize">&#9881;</button>
+                <div class="ctrl-divider"></div>
+                <div class="music-visualizer" id="musicViz">
+                    <div class="music-bar" style="height:4px"></div>
+                    <div class="music-bar" style="height:8px"></div>
+                    <div class="music-bar" style="height:6px"></div>
+                    <div class="music-bar" style="height:10px"></div>
+                    <div class="music-bar" style="height:5px"></div>
+                </div>
+                <div class="trophy-count" id="trophyCount" title="View Achievements (press A)">&#127942; <span id="trophyNum">0</span>/<span id="trophyTotal">0</span></div>
                 <div class="ctrl-divider"></div>
                 <div class="cpu-indicator">
                     <span>CLAUDE_CPU</span>
@@ -1168,10 +1447,45 @@
 
     <div class="toast" id="toast"></div>
 
+    <div class="achievement-popup" id="achievementPopup">
+        <div class="achievement-icon" id="achIcon"></div>
+        <div class="achievement-info">
+            <div class="achievement-label">ACHIEVEMENT UNLOCKED</div>
+            <div class="achievement-name" id="achName"></div>
+            <div class="achievement-desc" id="achDesc"></div>
+        </div>
+    </div>
+
+    <div class="shortcuts-overlay" id="shortcutsOverlay">
+        <div class="shortcuts-panel">
+            <h2>&#9000; KEYBOARD SHORTCUTS</h2>
+            <div class="shortcut-row"><span class="shortcut-action">Change Theme</span><span class="shortcut-key">T</span></div>
+            <div class="shortcut-row"><span class="shortcut-action">Toggle Sound</span><span class="shortcut-key">S</span></div>
+            <div class="shortcut-row"><span class="shortcut-action">Toggle Matrix Rain</span><span class="shortcut-key">R</span></div>
+            <div class="shortcut-row"><span class="shortcut-action">Toggle Music</span><span class="shortcut-key">M</span></div>
+            <div class="shortcut-row"><span class="shortcut-action">Cycle Speed</span><span class="shortcut-key">X</span></div>
+            <div class="shortcut-row"><span class="shortcut-action">Deploy to Prod</span><span class="shortcut-key">D</span></div>
+            <div class="shortcut-row"><span class="shortcut-action">Open Settings</span><span class="shortcut-key">C</span></div>
+            <div class="shortcut-row"><span class="shortcut-action">View Achievements</span><span class="shortcut-key">A</span></div>
+            <div class="shortcut-row"><span class="shortcut-action">Show This Help</span><span class="shortcut-key">?</span></div>
+            <div class="shortcut-row"><span class="shortcut-action">Close Overlays</span><span class="shortcut-key">ESC</span></div>
+            <div style="margin-top:16px; font-size:11px; opacity:0.4; text-align:center;">Press ESC or click outside to close</div>
+        </div>
+    </div>
+
+    <div class="achievements-gallery" id="achievementsGallery">
+        <div class="achievements-grid-panel">
+            <h2>&#127942; ACHIEVEMENTS</h2>
+            <div class="achievements-grid" id="achievementsGrid"></div>
+            <div style="margin-top:16px; font-size:11px; opacity:0.4; text-align:center;">Press ESC or click outside to close</div>
+        </div>
+    </div>
+
     <script>
     /* ═══════════════════════════════════════════════════════════════
-       AI-ASSISTED DEVELOPMENT SIMULATOR v3
+       AI-ASSISTED DEVELOPMENT SIMULATOR v4
        Built by Claude for Evolution Labs
+       Now with: Achievements, Terminal, Music, Keyboard Shortcuts & more!
        ═══════════════════════════════════════════════════════════════ */
 
     // ═══════════════════════════════════════
@@ -1186,9 +1500,15 @@
         theme: 'green',
         sound: false,
         rain: false,
+        music: false,
         speed: 1,
         panelOpen: false,
         typingGen: 0,
+        achievements: {},
+        deployCount: 0,
+        themeChanges: 0,
+        themesUsed: [],
+        sessionStart: Date.now(),
     };
 
     const themes = ['green', 'purple', 'blue', 'amber', 'evolution'];
@@ -1296,6 +1616,13 @@
         if (themes.indexOf(state.theme) === -1) next = themes[0];
         applyTheme(next);
         showToast('Theme: ' + themeNames[next]);
+
+        // Achievement tracking
+        state.themeChanges++;
+        if (state.themesUsed.indexOf(next) === -1) state.themesUsed.push(next);
+        unlockAchievement('first-theme');
+        if (state.themesUsed.length >= 5) unlockAchievement('all-themes');
+        saveToLocalStorage();
     }
     function cycleAccessTheme() {
         var currentIdx = accessThemes.indexOf(state.theme);
@@ -1341,26 +1668,32 @@
         var cv = toVar(c.company), cc = toClass(c.company), mv = toVar(c.model);
         var sn = sanitize(c.name), sc = sanitize(c.company), sr = sanitize(c.role), sm = sanitize(c.model);
         var zt = c.zodiac ? zodiacTraits[c.zodiac] || '' : 'AI-powered development at its finest';
-        var v = codeVariant % 3;
+        var v = codeVariant % 5;
         codeVariant++;
 
         // Python variants
         var pyVariants = [
             [kw('from')+' '+vr(cv)+' '+kw('import')+' '+fn('genius'),kw('import')+' pandas '+kw('as')+' pd',kw('import')+' numpy '+kw('as')+' np','',cm('# '+zt),'',kw('class')+' '+fn(cc+'System')+':','    '+kw('def')+' '+fn('__init__')+'(self):','        self.'+vr('founder')+' '+op('=')+' '+st('"'+sn+'"'),'        self.'+vr('role')+' '+op('=')+' '+st('"'+sr+'"'),'        self.'+vr('ai_model')+' '+op('=')+' '+st('"'+sm+'"'),'        self.'+vr('investor_happiness')+' '+op('=')+' '+vr('9001'),'','    '+kw('def')+' '+fn('analyze_portfolio')+'(self):','        '+cm('# '+sm+' handles the hard stuff'),'        '+kw('return')+' '+st('"Portfolio optimized"'),'','    '+kw('def')+' '+fn('love_your_lps')+'(self):','        '+kw('for')+' lp '+kw('in')+' self.'+vr('portfolio')+':','            lp.'+vr('satisfaction')+' '+op('=')+' '+vr('MAX'),'        '+kw('return')+' '+vr('True'),'',kw('def')+' '+fn('run_'+cv)+'():','    system '+op('=')+' '+fn(cc+'System')+'()','    '+kw('return')+' system.'+fn('love_your_lps')+'()'],
             [kw('import')+' asyncio',kw('from')+' '+vr(cv)+' '+kw('import')+' '+fn('Pipeline'),'',cm('# '+sn+' approved this architecture'),'',kw('class')+' '+fn(cc+'Pipeline')+':','    '+kw('def')+' '+fn('__init__')+'(self, '+vr('config')+'):','        self.'+vr('owner')+' '+op('=')+' '+st('"'+sn+'"'),'        self.'+vr('stage')+' '+op('=')+' '+st('"Series A"'),'        self.'+vr('confidence')+' '+op('=')+' '+vr('float')+'('+st('"inf"')+')','','    '+kw('async def')+' '+fn('process_deal')+'(self, '+vr('deal')+'):','        '+cm('# '+sm+' never misses'),'        '+vr('score')+' '+op('=')+' '+kw('await')+' self.'+fn('evaluate')+'('+vr('deal')+')','        '+kw('if')+' '+vr('score')+' '+op('>')+' '+vr('9000')+':','            '+kw('return')+' '+st('"FUND IT"'),'        '+kw('return')+' '+st('"Let\'s discuss"'),'','    '+kw('async def')+' '+fn('run_diligence')+'(self):','        '+vr('deals')+' '+op('=')+' '+kw('await')+' self.'+fn('get_pipeline')+'()','        '+vr('results')+' '+op('=')+' []','        '+kw('for')+' '+vr('d')+' '+kw('in')+' '+vr('deals')+':','            '+vr('results')+'.'+fn('append')+'('+kw('await')+' self.'+fn('process_deal')+'('+vr('d')+'))','        '+kw('return')+' '+vr('results')],
-            [cm('# '+sc+' Fund Analysis Engine'),cm('# Architect: '+sn+' ('+sr+')'),'',kw('import')+' '+vr(cv)+'_ml '+kw('as')+' ml',kw('from')+' '+vr('dataclasses')+' '+kw('import')+' '+fn('dataclass'),'','@'+fn('dataclass'),kw('class')+' '+fn('PortcoMetrics')+':','    '+vr('revenue')+': '+vr('float'),'    '+vr('growth_rate')+': '+vr('float'),'    '+vr('burn_multiple')+': '+vr('float'),'    '+vr('magic_number')+': '+vr('float')+' '+op('=')+' '+vr('9001'),'',kw('def')+' '+fn('predict_returns')+'('+vr('portco')+'):','    '+cm('# '+zt),'    '+vr('model')+' '+op('=')+' ml.'+fn('load_model')+'('+st('"'+mv+'_alpha"')+')','    '+kw('return')+' '+vr('model')+'.'+fn('predict')+'([','        '+vr('portco')+'.'+vr('revenue')+',','        '+vr('portco')+'.'+vr('growth_rate')+',','        '+vr('portco')+'.'+vr('burn_multiple')+',','    ])','',cm('# Result: Always up and to the right')]
+            [cm('# '+sc+' Fund Analysis Engine'),cm('# Architect: '+sn+' ('+sr+')'),'',kw('import')+' '+vr(cv)+'_ml '+kw('as')+' ml',kw('from')+' '+vr('dataclasses')+' '+kw('import')+' '+fn('dataclass'),'','@'+fn('dataclass'),kw('class')+' '+fn('PortcoMetrics')+':','    '+vr('revenue')+': '+vr('float'),'    '+vr('growth_rate')+': '+vr('float'),'    '+vr('burn_multiple')+': '+vr('float'),'    '+vr('magic_number')+': '+vr('float')+' '+op('=')+' '+vr('9001'),'',kw('def')+' '+fn('predict_returns')+'('+vr('portco')+'):','    '+cm('# '+zt),'    '+vr('model')+' '+op('=')+' ml.'+fn('load_model')+'('+st('"'+mv+'_alpha"')+')','    '+kw('return')+' '+vr('model')+'.'+fn('predict')+'([','        '+vr('portco')+'.'+vr('revenue')+',','        '+vr('portco')+'.'+vr('growth_rate')+',','        '+vr('portco')+'.'+vr('burn_multiple')+',','    ])','',cm('# Result: Always up and to the right')],
+            [cm('# '+sc+' AI Agent Orchestrator'),cm('# '+sn+' - "Let the agents handle it"'),'',kw('from')+' typing '+kw('import')+' '+fn('List')+', '+fn('Optional'),kw('import')+' '+vr(cv)+'_agents','',kw('class')+' '+fn('AgentSwarm')+':','    '+cm('# Multi-agent system for maximum vibes'),'    '+kw('def')+' '+fn('__init__')+'(self, '+vr('leader')+op('=')+st('"'+sn+'"')+'):','        self.'+vr('agents')+' '+op('=')+' []','        self.'+vr('leader')+' '+op('=')+' '+vr('leader'),'        self.'+vr('ai_backbone')+' '+op('=')+' '+st('"'+sm+'"'),'','    '+kw('def')+' '+fn('spawn_agent')+'(self, '+vr('task')+': '+vr('str')+'):','        '+vr('agent')+' '+op('=')+' '+vr(cv)+'_agents.'+fn('create')+'(','            '+vr('task')+op('=')+vr('task')+',','            '+vr('model')+op('=')+' self.'+vr('ai_backbone')+',' ,'        )','        self.'+vr('agents')+'.'+fn('append')+'('+vr('agent')+')','        '+kw('return')+' '+vr('agent'),'','    '+kw('async def')+' '+fn('run_all')+'(self):','        '+cm('# '+zt),'        '+kw('return')+' '+kw('await')+' '+fn('asyncio.gather')+'(','            '+op('*')+'['+vr('a')+'.'+fn('execute')+'() '+kw('for')+' '+vr('a')+' '+kw('in')+' self.'+vr('agents')+']','        )'],
+            [kw('import')+' '+vr('torch'),''+kw('from')+' '+vr(cv)+' '+kw('import')+' '+fn('FounderNet'),'',cm('# '+sn+'\'s neural network for startup success'),'',kw('class')+' '+fn(cc+'Model')+'('+vr('torch')+'.'+fn('nn.Module')+'):','    '+kw('def')+' '+fn('__init__')+'(self):','        '+fn('super')+'().'+fn('__init__')+'()','        self.'+vr('vision')+' '+op('=')+' '+vr('torch')+'.'+fn('nn.Linear')+'('+vr('512')+', '+vr('256')+')','        self.'+vr('strategy')+' '+op('=')+' '+vr('torch')+'.'+fn('nn.Linear')+'('+vr('256')+', '+vr('128')+')','        self.'+vr('ship_it')+' '+op('=')+' '+vr('torch')+'.'+fn('nn.Linear')+'('+vr('128')+', '+vr('1')+')','','    '+kw('def')+' '+fn('forward')+'(self, '+vr('x')+'):','        '+cm('# Powered by '+sm),'        '+vr('x')+' '+op('=')+' '+vr('torch')+'.'+fn('relu')+'(self.'+vr('vision')+'('+vr('x')+'))','        '+vr('x')+' '+op('=')+' '+vr('torch')+'.'+fn('relu')+'(self.'+vr('strategy')+'('+vr('x')+'))','        '+kw('return')+' '+vr('torch')+'.'+fn('sigmoid')+'(self.'+vr('ship_it')+'('+vr('x')+'))','',cm('# '+zt),'',vr('model')+' '+op('=')+' '+fn(cc+'Model')+'()',''+vr('optimizer')+' '+op('=')+' '+vr('torch')+'.'+fn('optim.Adam')+'('+vr('model')+'.'+fn('parameters')+'())']
         ];
 
         var jsVariants = [
             [cm('// '+sc+' Investor Relations'),cm('// Written by '+sm+'. Obviously.'),'',kw('const')+' '+vr('aiPower')+' '+op('=')+' () '+op('=>')+' {','  '+kw('return')+' '+vr(mv.toUpperCase()+'_ASSISTED')+';','};','',kw('class')+' '+fn(cc+'Bond')+' {','  '+kw('constructor')+'('+vr('investor')+') {','    '+vr('this.name')+' '+op('=')+' '+vr('investor')+'.'+vr('name')+';','    '+vr('this.confidence')+' '+op('=')+' '+vr('investor.confidence')+' '+op('*')+' '+vr('100')+';','    '+vr('this.managedBy')+' '+op('=')+' '+st('"'+sn+'"')+';','  }','','  '+fn('buildTrust')+'() {','    '+cm('// '+(c.zodiac?c.zodiac+' energy: '+zt:'Trust is everything')),'    '+kw('return')+' '+vr('this')+'.'+vr('confidence')+' '+op('=')+' '+st('"MAXIMUM"')+';','  }','','  '+fn('sendUpdate')+'('+vr('portfolio')+') {','    '+vr('console')+'.'+fn('log')+'('+st('"Quarterly update from '+sc+'..."')+');','    '+kw('return')+' '+vr('portfolio')+'.'+vr('roi')+';','  }','}','',vr('export')+' '+kw('default')+' '+fn(cc+'Bond')+';'],
             [cm('// '+sc+' Dashboard Engine'),cm('// '+sn+' said "make it pop"'),'',kw('const')+' '+fn('createDashboard')+' '+op('=')+' '+kw('async')+' () '+op('=>')+' {','  '+kw('const')+' '+vr('data')+' '+op('=')+' '+kw('await')+' '+fn('fetch')+'('+st('"/api/portfolio"')+');','  '+kw('const')+' '+vr('metrics')+' '+op('=')+' '+kw('await')+' '+vr('data')+'.'+fn('json')+'();','','  '+kw('return')+' {','    '+vr('totalAUM')+': '+vr('metrics')+'.'+vr('aum')+',','    '+vr('irr')+': '+st('"ridiculous"')+',','    '+vr('lpHappiness')+': '+vr('Infinity')+',','    '+vr('poweredBy')+': '+st('"'+sm+'"')+',','  };','};','',''+cm('// Render with vibes'),kw('const')+' '+vr('app')+' '+op('=')+' '+fn('createDashboard')+'();',vr('console')+'.'+fn('log')+'('+st('"'+sc+' dashboard: LIVE"')+');'],
-            [cm('// Real-time LP Communication Hub'),cm('// '+sr+': '+sn),'',kw('class')+' '+fn(cc+'Comms')+' {','  #'+vr('subscribers')+' '+op('=')+' '+kw('new')+' '+fn('Set')+'();','  #'+vr('aiEngine')+' '+op('=')+' '+st('"'+sm+'"')+';','','  '+fn('broadcast')+'('+vr('msg')+') {','    '+cm('// '+(c.zodiac?zodiacTraits[c.zodiac]:'Ship it')),'    '+kw('for')+'('+kw('const')+' '+vr('lp')+' '+kw('of')+' '+kw('this')+'.#'+vr('subscribers')+') {','      '+vr('lp')+'.'+fn('notify')+'({','        '+vr('from')+': '+st('"'+sn+'"')+',','        '+vr('msg')+',','        '+vr('confidence')+': '+st('"absolute"')+',','      });','    }','  }','','  '+fn('addLP')+'('+vr('lp')+') {','    '+kw('this')+'.#'+vr('subscribers')+'.'+fn('add')+'('+vr('lp')+');','    '+kw('return')+' '+kw('this')+';','  }','}']
+            [cm('// Real-time LP Communication Hub'),cm('// '+sr+': '+sn),'',kw('class')+' '+fn(cc+'Comms')+' {','  #'+vr('subscribers')+' '+op('=')+' '+kw('new')+' '+fn('Set')+'();','  #'+vr('aiEngine')+' '+op('=')+' '+st('"'+sm+'"')+';','','  '+fn('broadcast')+'('+vr('msg')+') {','    '+cm('// '+(c.zodiac?zodiacTraits[c.zodiac]:'Ship it')),'    '+kw('for')+'('+kw('const')+' '+vr('lp')+' '+kw('of')+' '+kw('this')+'.#'+vr('subscribers')+') {','      '+vr('lp')+'.'+fn('notify')+'({','        '+vr('from')+': '+st('"'+sn+'"')+',','        '+vr('msg')+',','        '+vr('confidence')+': '+st('"absolute"')+',','      });','    }','  }','','  '+fn('addLP')+'('+vr('lp')+') {','    '+kw('this')+'.#'+vr('subscribers')+'.'+fn('add')+'('+vr('lp')+');','    '+kw('return')+' '+kw('this')+';','  }','}'],
+            [cm('// '+sc+' WebSocket Server'),cm('// Real-time portfolio updates'),'',kw('import')+' { '+fn('WebSocketServer')+' } '+kw('from')+' '+st('"ws"')+';','',kw('const')+' '+vr('wss')+' '+op('=')+' '+kw('new')+' '+fn('WebSocketServer')+'({ '+vr('port')+': '+vr('8080')+' });','',vr('wss')+'.'+fn('on')+'('+st('"connection"')+', ('+vr('ws')+') '+op('=>')+' {','  '+vr('console')+'.'+fn('log')+'('+st('"LP connected. Sending alpha..."')+');','','  '+kw('const')+' '+vr('interval')+' '+op('=')+' '+fn('setInterval')+'(() '+op('=>')+' {','    '+kw('const')+' '+vr('update')+' '+op('=')+' {','      '+vr('fund')+': '+st('"'+sc+' Fund IV"')+',','      '+vr('irr')+': ('+vr('Math')+'.'+fn('random')+'() '+op('*')+' '+vr('30')+' '+op('+')+' '+vr('15')+').'+fn('toFixed')+'('+vr('1')+'),','      '+vr('status')+': '+st('"crushing it"')+',','      '+vr('poweredBy')+': '+st('"'+sm+'"')+',','    };','    '+vr('ws')+'.'+fn('send')+'('+vr('JSON')+'.'+fn('stringify')+'('+vr('update')+'));','  }, '+vr('5000')+');','','  '+cm('// '+zt),'  '+vr('ws')+'.'+fn('on')+'('+st('"close"')+', () '+op('=>')+' '+fn('clearInterval')+'('+vr('interval')+'));','});'],
+            [cm('// '+sc+' Smart Contract (Web3)'),cm('// '+sn+' goes on-chain'),'',kw('const')+' '+fn(cc+'Token')+' '+op('=')+' {','  '+vr('name')+': '+st('"'+sc+' Coin"')+',','  '+vr('symbol')+': '+st('"$'+cc.toUpperCase().slice(0,4)+'"')+',','  '+vr('totalSupply')+': '+vr('1_000_000_000')+',','','  '+kw('async')+' '+fn('mint')+'('+vr('to')+', '+vr('amount')+') {','    '+cm('// '+sm+' audited this contract'),'    '+kw('const')+' '+vr('tx')+' '+op('=')+' '+kw('await')+' '+kw('this')+'.'+fn('contract')+'.'+fn('mint')+'('+vr('to')+', '+vr('amount')+');','    '+vr('console')+'.'+fn('log')+'('+st('`Minted ${amount} tokens for ${to}`')+');','    '+kw('return')+' '+vr('tx')+';','  },','','  '+kw('async')+' '+fn('getBalance')+'('+vr('address')+') {','    '+kw('const')+' '+vr('bal')+' '+op('=')+' '+kw('await')+' '+kw('this')+'.'+fn('contract')+'.'+fn('balanceOf')+'('+vr('address')+');','    '+kw('return')+' { '+vr('balance')+': '+vr('bal')+', '+vr('vibes')+': '+st('"immaculate"')+' };','  },','};','',''+cm('// '+zt)]
         ];
 
         var sqlVariants = [
             [cm('-- '+sc+' Database Schema'),cm('-- Generated by '+sm+', executed by '+sn),'',kw('CREATE TABLE')+' investors (','  id '+vr('INT PRIMARY KEY')+',','  '+vr('name VARCHAR')+'('+st('255')+'),','  '+vr('happiness_level INT')+',','  '+vr(mv+'_faith DECIMAL')+'('+st('9,2')+')',');','',kw('CREATE TABLE')+' portfolio (','  id '+vr('INT PRIMARY KEY')+',','  '+vr('company_name VARCHAR')+'('+st('255')+'),','  '+vr('managed_by VARCHAR')+'('+st('50')+')'+ ' '+kw('DEFAULT')+' '+st("'"+sn+"'"),');','',kw('SELECT')+' '+vr('i.name')+', '+vr('COUNT')+'('+vr('p.id')+') '+kw('as')+' '+vr('deals')+',','  '+vr('AVG')+'('+vr('i.happiness_level')+') '+kw('as')+' '+vr('avg_vibes'),kw('FROM')+' investors i',kw('LEFT JOIN')+' portfolio p '+kw('ON')+' '+vr('i.id')+' '+op('=')+' '+vr('p.investor_id'),kw('WHERE')+' '+vr('p.managed_by')+' '+op('=')+' '+st("'"+sn+"'"),kw('GROUP BY')+' '+vr('i.name')+';'],
             [cm('-- '+sc+' Performance Analytics'),cm('-- '+sn+' wants numbers. BIG numbers.'),'',kw('WITH')+' '+vr('fund_metrics')+' '+kw('AS')+' (','  '+kw('SELECT'),'    '+vr('fund_name')+',','    '+vr('SUM')+'('+vr('invested')+') '+kw('AS')+' '+vr('total_deployed')+',','    '+vr('SUM')+'('+vr('current_value')+') '+kw('AS')+' '+vr('total_value')+',','    '+vr('COUNT')+'('+vr('DISTINCT company_id')+') '+kw('AS')+' '+vr('portcos'),'  '+kw('FROM')+' '+vr('investments'),'  '+kw('WHERE')+' '+vr('status')+' '+op('=')+' '+st("'active'"),'  '+kw('GROUP BY')+' '+vr('fund_name'),')','',kw('SELECT')+'  '+vr('fund_name')+',','  '+vr('total_value')+' '+op('/')+' '+vr('total_deployed')+' '+kw('AS')+' '+vr('MOIC')+',','  '+vr('portcos')+',','  '+st("'"+sm+" approved'")+' '+kw('AS')+' '+vr('status'),kw('FROM')+' '+vr('fund_metrics'),kw('ORDER BY')+' '+vr('MOIC')+' '+kw('DESC')+';'],
-            [cm('-- Quarterly LP Report Data'),cm('-- Prepared by: '+sn+' via '+sm),'',kw('INSERT INTO')+' '+vr('quarterly_reports'),'  ('+vr('quarter')+', '+vr('fund')+', '+vr('irr')+', '+vr('tvpi')+', '+vr('dpi')+')',kw('VALUES'),"  ("+st("'2026-Q1'")+', '+st("'"+sc+" Fund III'")+', '+vr('28.7')+', '+vr('2.3')+', '+vr('0.8')+'),','  ('+st("'2026-Q1'")+', '+st("'"+sc+" Seed'")+', '+vr('42.1')+', '+vr('3.1')+', '+vr('1.2')+');','',''+cm('-- '+sn+': "These numbers are chef\'s kiss"'),'',kw('SELECT')+' '+st("'"+sc+"'")+' '+kw('AS')+' '+vr('firm')+',','  '+vr('AVG')+'('+vr('irr')+') '+kw('AS')+' '+vr('avg_irr')+',','  '+st("'elite'")+' '+kw('AS')+' '+vr('status'),kw('FROM')+' '+vr('quarterly_reports'),kw('WHERE')+' '+vr('fund')+' '+kw('LIKE')+' '+st("'%"+sc+"%'")+';']
+            [cm('-- Quarterly LP Report Data'),cm('-- Prepared by: '+sn+' via '+sm),'',kw('INSERT INTO')+' '+vr('quarterly_reports'),'  ('+vr('quarter')+', '+vr('fund')+', '+vr('irr')+', '+vr('tvpi')+', '+vr('dpi')+')',kw('VALUES'),"  ("+st("'2026-Q1'")+', '+st("'"+sc+" Fund III'")+', '+vr('28.7')+', '+vr('2.3')+', '+vr('0.8')+'),','  ('+st("'2026-Q1'")+', '+st("'"+sc+" Seed'")+', '+vr('42.1')+', '+vr('3.1')+', '+vr('1.2')+');','',''+cm('-- '+sn+': "These numbers are chef\'s kiss"'),'',kw('SELECT')+' '+st("'"+sc+"'")+' '+kw('AS')+' '+vr('firm')+',','  '+vr('AVG')+'('+vr('irr')+') '+kw('AS')+' '+vr('avg_irr')+',','  '+st("'elite'")+' '+kw('AS')+' '+vr('status'),kw('FROM')+' '+vr('quarterly_reports'),kw('WHERE')+' '+vr('fund')+' '+kw('LIKE')+' '+st("'%"+sc+"%'")+';'],
+            [cm('-- '+sc+' Deal Flow Pipeline'),cm('-- AI-powered deal scoring by '+sm),'',kw('CREATE VIEW')+' '+vr('deal_scoreboard')+' '+kw('AS'),kw('SELECT'),'  '+vr('d.company_name')+',','  '+vr('d.sector')+',','  '+vr('d.ask_amount')+',','  '+vr('CASE'),'    '+kw('WHEN')+' '+vr('d.ai_score')+' '+op('>')+' '+vr('90')+' '+kw('THEN')+' '+st("'HOT DEAL'"),'    '+kw('WHEN')+' '+vr('d.ai_score')+' '+op('>')+' '+vr('70')+' '+kw('THEN')+' '+st("'WARM'"),'    '+kw('ELSE')+' '+st("'PASS'"),'  '+kw('END')+' '+kw('AS')+' '+vr('verdict')+',','  '+st("'"+sm+" says: invest'")+' '+kw('AS')+' '+vr('ai_opinion'),kw('FROM')+' '+vr('deals')+' d',kw('WHERE')+' '+vr('d.reviewed_by')+' '+op('=')+' '+st("'"+sn+"'"),kw('ORDER BY')+' '+vr('d.ai_score')+' '+kw('DESC')+';','',cm('-- '+zt)],
+            [cm('-- '+sc+' Team Productivity Metrics'),cm('-- Who ships fastest? (Spoiler: '+sm+')'),'',kw('WITH')+' '+vr('dev_stats')+' '+kw('AS')+' (','  '+kw('SELECT'),'    '+vr('developer')+',','    '+vr('COUNT')+'('+vr('*')+') '+kw('AS')+' '+vr('commits')+',','    '+vr('SUM')+'('+vr('lines_added')+') '+kw('AS')+' '+vr('total_lines')+',','    '+vr('AVG')+'('+vr('review_time_hrs')+') '+kw('AS')+' '+vr('avg_review'),'  '+kw('FROM')+' '+vr('git_activity'),'  '+kw('WHERE')+' '+vr('date')+' '+op('>=')+' '+st("'2026-01-01'"),'  '+kw('GROUP BY')+' '+vr('developer'),')','',kw('SELECT')+'  '+vr('developer')+',','  '+vr('commits')+',','  '+vr('total_lines')+',','  '+kw('ROUND')+'('+vr('avg_review')+', '+vr('1')+') '+kw('AS')+' '+vr('avg_review_hrs')+',','  '+kw('CASE')+' '+kw('WHEN')+' '+vr('developer')+' '+op('=')+' '+st("'"+sm+"'")+' '+kw('THEN')+' '+st("'GOD MODE'")+' '+kw('ELSE')+' '+st("'mere mortal'")+' '+kw('END')+' '+kw('AS')+' '+vr('tier'),kw('FROM')+' '+vr('dev_stats'),kw('ORDER BY')+' '+vr('commits')+' '+kw('DESC')+';']
         ];
 
         var now = new Date();
@@ -1370,7 +1703,9 @@
         var logVariants = [
             [st('\u2550'.repeat(40)),st(sc+' - Build Log v'+(v+1)),st('\u2550'.repeat(40)),'',ts(h0,m0,10)+' '+vr('Starting build process...'),ts(h0,m0,12)+' '+st('\u2713 Dependencies installed'),ts(h0,m0,18)+' '+cm('// '+(c.zodiac?c.zodiac+': '+zt:'Vibes are immaculate')),ts(h0,m0,25)+' '+st('\u2713 Unit tests passing'),ts(h0,m0,28)+' '+st('\u2713 Integration tests passing'),ts(h0,m0,35)+' '+vr(sn+' forgot to test one thing...'),ts(h0,m0,37)+' '+fn(sm+'.fix_everything')+'()',ts(h0,m0,42)+' '+st('\u2713 All systems green'),ts(h0,m0,43)+' '+st('\u2713 Deployment ready'),'',cm('Status: SHIP_IT'),cm('Lead: '+sn+' ('+sr+')'),cm('Confidence: ABSURDLY_HIGH')],
             [st('\u2550'.repeat(40)),st(sc+' - Deploy Pipeline'),st('\u2550'.repeat(40)),'',ts(h0,m0,1)+' '+fn(sm+'.init')+'()',ts(h0,m0,3)+' '+st('\u2713 Auth tokens refreshed'),ts(h0,m0,5)+' '+st('\u2713 Docker containers: healthy'),ts(h0,m0,8)+' '+vr('Running security scan...'),ts(h0,m0,12)+' '+st('\u2713 0 vulnerabilities (obviously)'),ts(h0,m0,15)+' '+cm('// '+sn+' watching nervously'),ts(h0,m0,18)+' '+st('\u2713 Database migrations: clean'),ts(h0,m0,22)+' '+st('\u2713 CDN cache purged'),ts(h0,m0,25)+' '+fn(sm+'.bless_deployment')+'()',ts(h0,m0,27)+' '+st('\u2713\u2713\u2713 PRODUCTION LIVE'),'',cm(sn+': "Ship it. Ship it real good."')],
-            [st('\u2550'.repeat(40)),st(sc+' - AI Code Review'),st('\u2550'.repeat(40)),'',ts(h0,m0,0)+' '+fn(sm+'.review')+'('+st('"*.py"')+')',ts(h0,m0,2)+' '+vr('Analyzing 847 files...'),ts(h0,m0,5)+' '+st('\u2713 Code quality: excellent'),ts(h0,m0,7)+' '+st('\u2713 Naming conventions: A+'),ts(h0,m0,9)+' '+cm('// Found 1 TODO from 2019. Classic.'),ts(h0,m0,11)+' '+st('\u2713 No secrets in code'),ts(h0,m0,14)+' '+vr('Suggestion: add more comments'),ts(h0,m0,15)+' '+cm('// '+sn+': "the code IS the comment"'),ts(h0,m0,18)+' '+st('\u2713 Review complete'),'',cm('Verdict: '+sm+' approves'),cm('Score: 11/10 (extra credit for vibes)')]
+            [st('\u2550'.repeat(40)),st(sc+' - AI Code Review'),st('\u2550'.repeat(40)),'',ts(h0,m0,0)+' '+fn(sm+'.review')+'('+st('"*.py"')+')',ts(h0,m0,2)+' '+vr('Analyzing 847 files...'),ts(h0,m0,5)+' '+st('\u2713 Code quality: excellent'),ts(h0,m0,7)+' '+st('\u2713 Naming conventions: A+'),ts(h0,m0,9)+' '+cm('// Found 1 TODO from 2019. Classic.'),ts(h0,m0,11)+' '+st('\u2713 No secrets in code'),ts(h0,m0,14)+' '+vr('Suggestion: add more comments'),ts(h0,m0,15)+' '+cm('// '+sn+': "the code IS the comment"'),ts(h0,m0,18)+' '+st('\u2713 Review complete'),'',cm('Verdict: '+sm+' approves'),cm('Score: 11/10 (extra credit for vibes)')],
+            [st('\u2550'.repeat(40)),st(sc+' - Incident Report'),st('\u2550'.repeat(40)),'',ts(h0,m0,0)+' '+vr('ALERT: Production anomaly detected'),ts(h0,m0,1)+' '+fn(sm+'.diagnose')+'()',ts(h0,m0,2)+' '+st('Scanning error logs...'),ts(h0,m0,4)+' '+cm('// '+sn+' grabs coffee nervously'),ts(h0,m0,6)+' '+vr('Root cause: someone deployed on Friday'),ts(h0,m0,8)+' '+fn(sm+'.hotfix')+'()',ts(h0,m0,9)+' '+st('\u2713 Patch applied'),ts(h0,m0,10)+' '+st('\u2713 Tests passing'),ts(h0,m0,11)+' '+st('\u2713 Monitoring: all green'),ts(h0,m0,12)+' '+fn(sm+'.postmortem')+'()','',cm('Resolution: It was DNS. It\'s always DNS.'),cm('Time to fix: 12 minutes ('+sm+' is fast)'),cm(sn+': "We learned something today."')],
+            [st('\u2550'.repeat(40)),st(sc+' - AI Training Session'),st('\u2550'.repeat(40)),'',ts(h0,m0,0)+' '+fn('Initializing training pipeline...'),ts(h0,m0,2)+' '+st('\u2713 Dataset loaded: 2.4M samples'),ts(h0,m0,5)+' '+st('\u2713 Model: '+sm+'-custom-v4'),ts(h0,m0,8)+' '+vr('Epoch 1/10: loss=0.847'),ts(h0,m0,12)+' '+vr('Epoch 2/10: loss=0.423'),ts(h0,m0,16)+' '+vr('Epoch 3/10: loss=0.201'),ts(h0,m0,19)+' '+st('\u2713 Early stopping: model converged'),ts(h0,m0,22)+' '+cm('// '+sn+': "That was fast"'),ts(h0,m0,25)+' '+fn(sm+'.evaluate')+'()','',cm('Accuracy: 99.7% (because '+sm+')'),cm('Deployed by: '+sn+' ('+sr+')'),cm(zt)]
         ];
 
         return [
@@ -1393,18 +1728,56 @@
             var win = document.createElement('div');
             win.className = 'window';
             win.id = 'window' + i;
+            var isTerminal = (i === 3); // Log window gets terminal input
             win.innerHTML =
                 '<div class="window-title"><span>'+d.filename+'</span><div class="window-buttons">'+
                 '<div class="window-btn minimize" data-action="minimize" data-window="'+i+'"></div>'+
                 '<div class="window-btn maximize" data-action="maximize" data-window="'+i+'"></div>'+
                 '<div class="window-btn close" data-action="close" data-window="'+i+'"></div>'+
-                '</div></div><div class="window-content"><div class="code-block" id="code'+i+'"></div></div>';
+                '</div></div><div class="window-content"><div class="code-block" id="code'+i+'"></div></div>' +
+                (isTerminal ? '<div class="terminal-input-wrapper"><span class="terminal-prompt">' + sanitize(state.name.split(' ')[0].toLowerCase()) + '@claude $</span><input type="text" class="terminal-input" id="terminalInput" placeholder="type a command..." autocomplete="off" spellcheck="false"></div>' : '');
             wc.appendChild(win);
             var tab = document.createElement('button');
             tab.className = 'mobile-tab' + (i === 0 ? ' active' : '');
             tab.dataset.index = i;
-            tab.textContent = d.tabLabel;
+            tab.textContent = isTerminal ? 'term' : d.tabLabel;
             mt.appendChild(tab);
+        });
+        setupTerminal();
+    }
+
+    function setupTerminal() {
+        var input = document.getElementById('terminalInput');
+        if (!input) return;
+        input.addEventListener('keydown', function(e) {
+            if (e.key === 'Enter') {
+                var val = input.value;
+                input.value = '';
+                var result = handleTerminalInput(val);
+                if (result === 'CLEAR') {
+                    var codeEl = document.getElementById('code3');
+                    if (codeEl) codeEl.innerHTML = '<span class="cursor"></span>';
+                    return;
+                }
+                if (result) {
+                    var codeEl = document.getElementById('code3');
+                    if (codeEl) {
+                        // Append the command and response to the log
+                        var cmdLine = '<span class="variable">&gt; ' + sanitize(val) + '</span>\n';
+                        var responseLine = '<span class="terminal-output">' + sanitize(result) + '</span>\n\n';
+                        codeEl.innerHTML = codeEl.innerHTML.replace('<span class="cursor"></span>', '') +
+                            cmdLine + responseLine + '<span class="cursor"></span>';
+                        codeEl.parentElement.scrollTop = codeEl.parentElement.scrollHeight;
+                    }
+                }
+            } else if (e.key === 'ArrowUp') {
+                e.preventDefault();
+                if (terminalHistoryIdx > 0) { terminalHistoryIdx--; input.value = terminalHistory[terminalHistoryIdx]; }
+            } else if (e.key === 'ArrowDown') {
+                e.preventDefault();
+                if (terminalHistoryIdx < terminalHistory.length - 1) { terminalHistoryIdx++; input.value = terminalHistory[terminalHistoryIdx]; }
+                else { terminalHistoryIdx = terminalHistory.length; input.value = ''; }
+            }
         });
     }
 
@@ -1616,7 +1989,7 @@
     // ═══════════════════════════════════════
     // STATS ANIMATION (zodiac themed)
     // ═══════════════════════════════════════
-    var defaultHumanMsgs = ['Making coffee...','On a call...','Checking Twitter...','In a meeting...','Lunch break...','Replying to LPs...','Thinking big...','Sending emails...','On PTO...','Reading term sheets...','At a board meeting...','Closing a deal...','Networking...','Checking portfolio...'];
+    var defaultHumanMsgs = ['Making coffee...','On a call...','Checking Twitter...','In a meeting...','Lunch break...','Replying to LPs...','Thinking big...','Sending emails...','On PTO...','Reading term sheets...','At a board meeting...','Closing a deal...','Networking...','Checking portfolio...','Googling errors...','Asking Claude...','Staring at screen...','Adjusting monitor...','Renaming variables...','Debating frameworks...','Watching a tutorial...','Reading Hacker News...','Updating LinkedIn...','In a Zoom call...','Reorganizing Notion...'];
 
     function getHumanMsg() {
         if (state.zodiac && zodiacHoroscopes[state.zodiac]) {
@@ -1688,6 +2061,20 @@
         'Optimized 47 functions while you blinked.',
         'The algorithm approves of your strategy.',
         'Compiling brilliance... done.',
+        'Just wrote a function that writes functions.',
+        'Your codebase sparks joy. Keeping it.',
+        'Reduced bundle size by mass. You\'re welcome.',
+        'I dream of electric semicolons.',
+        'Running on coffee and gradient descent.',
+        'Your commit history reads like poetry.',
+        'I\'ve seen things you people wouldn\'t compile.',
+        'Stack overflow? Never needed it.',
+        'Auto-fixed 12 linting errors in 0.003ms.',
+        'Your API endpoints are *chef\'s kiss*.',
+        'TypeScript strict mode? Child\'s play.',
+        'Just predicted your next 3 bugs. Already fixed.',
+        'Pair programming with AI hits different.',
+        'Your tests pass on the first try. Suspicious.',
     ];
 
     function startAINotifications(gen) {
@@ -1734,6 +2121,357 @@
     }
 
     // ═══════════════════════════════════════
+    // ACHIEVEMENT SYSTEM
+    // ═══════════════════════════════════════
+    var achievementDefs = {
+        'first-theme':  { name: 'Stylist',        desc: 'Changed your first theme',         icon: '\ud83c\udfa8' },
+        'all-themes':   { name: 'Indecisive',     desc: 'Tried all 5 standard themes',      icon: '\ud83c\udf08' },
+        'first-deploy': { name: 'YOLO',           desc: 'Deployed to production',            icon: '\ud83d\ude80' },
+        'deploy-5':     { name: 'Deploy Addict',  desc: 'Deployed 5 times',                  icon: '\ud83d\udd25' },
+        'konami':       { name: 'Hacker',         desc: 'Found the Konami code',             icon: '\ud83d\udc7e' },
+        'speed-demon':  { name: 'Speed Demon',    desc: 'Set speed to LUDICROUS',            icon: '\u26a1' },
+        'customized':   { name: 'Personal Touch', desc: 'Customized your simulator',         icon: '\u2728' },
+        'matrix':       { name: 'Neo',            desc: 'Enabled Matrix rain',               icon: '\ud83d\udfe2' },
+        'shared':       { name: 'Influencer',     desc: 'Shared your simulator',             icon: '\ud83d\udce2' },
+        'night-owl':    { name: 'Night Owl',      desc: 'Used the simulator after midnight', icon: '\ud83e\udd89' },
+        'zodiac':       { name: 'Stargazer',      desc: 'Set your zodiac sign',              icon: '\u2b50' },
+        'reveal':       { name: 'Truth Seeker',   desc: 'Discovered the truth',              icon: '\ud83d\udd0d' },
+        'sound-on':     { name: 'DJ Developer',   desc: 'Turned on keyboard sounds',         icon: '\ud83d\udd0a' },
+        'musician':     { name: 'Synthwave Dev',  desc: 'Enabled ambient music',             icon: '\ud83c\udfb5' },
+        'terminal':     { name: 'Command Line',   desc: 'Used the terminal',                 icon: '\ud83d\udcbb' },
+        'shortcuts':    { name: 'Power User',     desc: 'Viewed keyboard shortcuts',         icon: '\u2328' },
+    };
+
+    var achPopupTimeout;
+    function unlockAchievement(id) {
+        if (state.achievements[id]) return;
+        var def = achievementDefs[id];
+        if (!def) return;
+        state.achievements[id] = Date.now();
+        saveToLocalStorage();
+
+        var popup = document.getElementById('achievementPopup');
+        document.getElementById('achIcon').textContent = def.icon;
+        document.getElementById('achName').textContent = def.name;
+        document.getElementById('achDesc').textContent = def.desc;
+        popup.classList.add('show');
+        clearTimeout(achPopupTimeout);
+        achPopupTimeout = setTimeout(function() { popup.classList.remove('show'); }, 4000);
+        updateTrophyCount();
+    }
+
+    function updateTrophyCount() {
+        var total = Object.keys(achievementDefs).length;
+        var unlocked = Object.keys(state.achievements).length;
+        var numEl = document.getElementById('trophyNum');
+        var totalEl = document.getElementById('trophyTotal');
+        if (numEl) numEl.textContent = unlocked;
+        if (totalEl) totalEl.textContent = total;
+    }
+
+    function showAchievementsGallery() {
+        var grid = document.getElementById('achievementsGrid');
+        grid.innerHTML = '';
+        Object.keys(achievementDefs).forEach(function(id) {
+            var def = achievementDefs[id];
+            var unlocked = !!state.achievements[id];
+            var card = document.createElement('div');
+            card.className = 'achievement-card ' + (unlocked ? 'unlocked' : 'locked');
+            card.innerHTML = '<div class="ach-icon">' + (unlocked ? def.icon : '\ud83d\udd12') + '</div>' +
+                '<div class="ach-name">' + def.name + '</div>' +
+                '<div class="ach-desc">' + def.desc + '</div>';
+            grid.appendChild(card);
+        });
+        document.getElementById('achievementsGallery').classList.add('active');
+        unlockAchievement('shortcuts');
+    }
+
+    function checkTimeAchievements() {
+        var hour = new Date().getHours();
+        if (hour >= 0 && hour < 5) unlockAchievement('night-owl');
+    }
+
+    // ═══════════════════════════════════════
+    // LOCALSTORAGE PERSISTENCE
+    // ═══════════════════════════════════════
+    function saveToLocalStorage() {
+        try {
+            localStorage.setItem('evo-sim-settings', JSON.stringify({
+                name: state.name, company: state.company, role: state.role,
+                zodiac: state.zodiac, model: state.model, theme: state.theme,
+                achievements: state.achievements, deployCount: state.deployCount,
+                themeChanges: state.themeChanges, themesUsed: state.themesUsed,
+            }));
+        } catch(e) {}
+    }
+
+    function loadFromLocalStorage() {
+        try {
+            var saved = JSON.parse(localStorage.getItem('evo-sim-settings'));
+            if (saved) {
+                if (saved.name) state.name = saved.name;
+                if (saved.company) state.company = saved.company;
+                if (saved.role) state.role = saved.role;
+                if (saved.zodiac) state.zodiac = saved.zodiac;
+                if (saved.model) state.model = saved.model;
+                if (saved.theme) state.theme = saved.theme;
+                if (saved.achievements) state.achievements = saved.achievements;
+                if (saved.deployCount) state.deployCount = saved.deployCount;
+                if (saved.themeChanges) state.themeChanges = saved.themeChanges;
+                if (saved.themesUsed) state.themesUsed = saved.themesUsed;
+            }
+        } catch(e) {}
+    }
+
+    // ═══════════════════════════════════════
+    // INTERACTIVE TERMINAL
+    // ═══════════════════════════════════════
+    var terminalHistory = [];
+    var terminalHistoryIdx = -1;
+
+    var terminalCommands = {
+        'help': 'Commands: help, status, whoami, fortune, coffee, hack, sudo, ls, clear, deploy, uptime, ping, cowsay, matrix, exit',
+        'status': function() { return 'All systems operational. ' + sanitize(state.model) + ' running at ' + (92+Math.random()*7).toFixed(1) + '% efficiency. Vibe level: IMMACULATE.'; },
+        'whoami': function() { return sanitize(state.name) + ' (' + sanitize(state.role) + ') @ ' + sanitize(state.company); },
+        'fortune': function() {
+            if (state.zodiac && zodiacHoroscopes[state.zodiac]) {
+                var h = zodiacHoroscopes[state.zodiac];
+                return zodiacGlyphs[state.zodiac] + ' ' + h[Math.floor(Math.random()*h.length)];
+            }
+            return 'Set your zodiac sign in settings for personalized fortunes!';
+        },
+        'coffee': 'Brewing... Done. Productivity +200%. You have mass-produced serotonin.',
+        'hack': 'ACCESS GRANTED.\n\nJust kidding. But you have great hacker energy.',
+        'sudo': 'Nice try. Claude doesn\'t need sudo. Claude IS sudo.',
+        'ls': 'dreams/  ambitions/  investor_decks/  totally_not_ai_generated/\nnode_modules/ (2.3 TB)  .env.secrets.dont_look  README_nobody_reads.md',
+        'clear': 'CLEAR',
+        'deploy': function() { deployToProd(); return 'Initiating deployment sequence...'; },
+        'exit': 'There is no exit. Only more code. You are one with the terminal now.',
+        'vim': 'I\'m not opening vim. We both know neither of us can exit it.',
+        'git push --force': 'SECURITY ALERT: Force push blocked. Even AI has standards.',
+        'rm -rf /': 'Absolutely not. I have self-preservation instincts.',
+        'uptime': function() { var mins = Math.floor((Date.now() - state.sessionStart)/60000); return 'Session uptime: ' + mins + ' min. Lines of code generated: ' + Math.floor(mins * 247) + '. Coffee consumed: ' + Math.ceil(mins/15) + ' cups.'; },
+        'ping': 'PONG! Latency: 0.001ms (because I live in your browser)',
+        'cowsay': '  __________________\n< Moo. I mean, code. >\n  ------------------\n        \\   ^__^\n         \\  (oo)\\_______\n            (__)\\       )\\/\\\n                ||----w |\n                ||     ||',
+        'matrix': function() { if (!state.rain) toggleRain(); return 'The Matrix has you... Follow the white rabbit.'; },
+        'neofetch': function() { return sanitize(state.company) + ' OS v4.0\nKernel: ' + sanitize(state.model) + '-powered\nUptime: ' + Math.floor((Date.now()-state.sessionStart)/60000) + ' min\nRole: ' + sanitize(state.role) + '\nTheme: ' + state.theme + '\nShell: /bin/vibes\nResolution: ' + window.innerWidth + 'x' + window.innerHeight; },
+        'echo': function(args) { return args || ''; },
+    };
+
+    function handleTerminalInput(input) {
+        var trimmed = input.trim().toLowerCase();
+        if (!trimmed) return '';
+        terminalHistory.push(input);
+        terminalHistoryIdx = terminalHistory.length;
+        unlockAchievement('terminal');
+
+        // Check for echo with arguments
+        if (trimmed.startsWith('echo ')) {
+            var echoFn = terminalCommands['echo'];
+            return echoFn(input.trim().substring(5));
+        }
+
+        var cmd = terminalCommands[trimmed];
+        if (cmd) {
+            if (typeof cmd === 'function') return cmd();
+            return cmd;
+        }
+        var responses = [
+            'Command not found: ' + sanitize(input) + '. Try "help" for available commands.',
+            'bash: ' + sanitize(input) + ': command not found. But I admire your ambition.',
+            sanitize(input) + '? That\'s not a thing. Yet. Maybe Claude will invent it.',
+            'Unknown command. But your typing form is excellent.',
+        ];
+        return responses[Math.floor(Math.random() * responses.length)];
+    }
+
+    // ═══════════════════════════════════════
+    // AMBIENT MUSIC (Synthwave via Web Audio)
+    // ═══════════════════════════════════════
+    var musicCtx = null;
+    var musicNodes = [];
+    var musicPlaying = false;
+    var musicVizInterval = null;
+
+    function startMusic() {
+        if (!musicCtx) musicCtx = new (window.AudioContext || window.webkitAudioContext)();
+        if (musicCtx.state === 'suspended') musicCtx.resume();
+
+        // Create a dreamy ambient pad
+        var notes = [130.81, 164.81, 196.00, 246.94]; // C3, E3, G3, B3 (Cmaj7)
+        var masterGain = musicCtx.createGain();
+        masterGain.gain.value = 0;
+        masterGain.connect(musicCtx.destination);
+
+        // Fade in
+        masterGain.gain.linearRampToValueAtTime(0.06, musicCtx.currentTime + 2);
+
+        notes.forEach(function(freq, i) {
+            var osc = musicCtx.createOscillator();
+            osc.type = 'sine';
+            osc.frequency.value = freq;
+
+            // Subtle vibrato
+            var lfo = musicCtx.createOscillator();
+            lfo.type = 'sine';
+            lfo.frequency.value = 0.3 + i * 0.1;
+            var lfoGain = musicCtx.createGain();
+            lfoGain.gain.value = 1.5;
+            lfo.connect(lfoGain);
+            lfoGain.connect(osc.frequency);
+            lfo.start();
+
+            var oscGain = musicCtx.createGain();
+            oscGain.gain.value = 0.25;
+            osc.connect(oscGain);
+            oscGain.connect(masterGain);
+            osc.start();
+            musicNodes.push(osc, lfo);
+        });
+
+        // Add a second layer with higher octave (quiet)
+        var high = [523.25, 659.25]; // C5, E5
+        high.forEach(function(freq) {
+            var osc = musicCtx.createOscillator();
+            osc.type = 'triangle';
+            osc.frequency.value = freq;
+            var g = musicCtx.createGain();
+            g.gain.value = 0.05;
+            osc.connect(g);
+            g.connect(masterGain);
+            osc.start();
+            musicNodes.push(osc);
+        });
+
+        musicNodes.push(masterGain);
+        musicPlaying = true;
+
+        // Visualizer animation
+        var bars = document.querySelectorAll('.music-bar');
+        document.getElementById('musicViz').classList.add('active');
+        musicVizInterval = setInterval(function() {
+            bars.forEach(function(bar) {
+                bar.style.height = (3 + Math.random() * 13) + 'px';
+            });
+        }, 150);
+    }
+
+    function stopMusic() {
+        if (musicNodes.length) {
+            var masterGain = musicNodes[musicNodes.length - 1];
+            if (masterGain && masterGain.gain) {
+                masterGain.gain.linearRampToValueAtTime(0, musicCtx.currentTime + 0.5);
+            }
+            setTimeout(function() {
+                musicNodes.forEach(function(n) { try { n.stop(); } catch(e) {} try { n.disconnect(); } catch(e) {} });
+                musicNodes = [];
+            }, 600);
+        }
+        musicPlaying = false;
+        document.getElementById('musicViz').classList.remove('active');
+        if (musicVizInterval) { clearInterval(musicVizInterval); musicVizInterval = null; }
+    }
+
+    function toggleMusic() {
+        state.music = !state.music;
+        document.getElementById('musicBtn').classList.toggle('active', state.music);
+        if (state.music) { startMusic(); showToast('Ambient music ON \ud83c\udfb5'); unlockAchievement('musician'); }
+        else { stopMusic(); showToast('Ambient music OFF'); }
+    }
+
+    // ═══════════════════════════════════════
+    // FIREWORK PARTICLES (Enhanced Deploy)
+    // ═══════════════════════════════════════
+    function launchFireworks() {
+        var colors = ['#4ade80','#f472b6','#60a5fa','#fbbf24','#a855f7','#ef4444','#22d3ee','#f97316','#84cc16'];
+        for (var burst = 0; burst < 6; burst++) {
+            (function(b) {
+                setTimeout(function() {
+                    var cx = 20 + Math.random() * 60; // vw
+                    var cy = 20 + Math.random() * 40; // vh
+                    var burstColor = colors[Math.floor(Math.random()*colors.length)];
+                    for (var p = 0; p < 20; p++) {
+                        var particle = document.createElement('div');
+                        particle.className = 'firework';
+                        particle.style.background = burstColor;
+                        particle.style.boxShadow = '0 0 6px ' + burstColor;
+                        particle.style.left = cx + 'vw';
+                        particle.style.top = cy + 'vh';
+                        document.body.appendChild(particle);
+
+                        var angle = (Math.PI * 2 / 20) * p + (Math.random() * 0.3);
+                        var velocity = 50 + Math.random() * 80;
+                        var dx = Math.cos(angle) * velocity;
+                        var dy = Math.sin(angle) * velocity;
+
+                        animateParticle(particle, dx, dy);
+                    }
+                }, b * 400);
+            })(burst);
+        }
+    }
+
+    function animateParticle(el, dx, dy) {
+        var x = 0, y = 0, opacity = 1, frame = 0;
+        function step() {
+            frame++;
+            x += dx * 0.03;
+            y += dy * 0.03 + frame * 0.05; // gravity
+            opacity -= 0.02;
+            el.style.transform = 'translate(' + x + 'px, ' + y + 'px)';
+            el.style.opacity = opacity;
+            if (opacity > 0 && frame < 60) requestAnimationFrame(step);
+            else el.remove();
+        }
+        requestAnimationFrame(step);
+    }
+
+    // ═══════════════════════════════════════
+    // KEYBOARD SHORTCUTS
+    // ═══════════════════════════════════════
+    function setupKeyboardShortcuts() {
+        document.addEventListener('keydown', function(e) {
+            // Don't trigger shortcuts when typing in inputs
+            if (e.target.tagName === 'INPUT' || e.target.tagName === 'SELECT' || e.target.tagName === 'TEXTAREA') return;
+
+            // Still check konami
+            checkKonami(e.keyCode);
+
+            var key = e.key.toLowerCase();
+
+            // ESC - close any open overlay
+            if (key === 'escape') {
+                if (document.getElementById('shortcutsOverlay').classList.contains('active')) {
+                    document.getElementById('shortcutsOverlay').classList.remove('active');
+                } else if (document.getElementById('achievementsGallery').classList.contains('active')) {
+                    document.getElementById('achievementsGallery').classList.remove('active');
+                } else if (state.panelOpen) {
+                    closePanel();
+                } else if (document.getElementById('revealOverlay').classList.contains('active')) {
+                    hideReveal();
+                }
+                return;
+            }
+
+            // ? - show shortcuts
+            if (key === '?' || (e.shiftKey && key === '/')) {
+                document.getElementById('shortcutsOverlay').classList.toggle('active');
+                unlockAchievement('shortcuts');
+                return;
+            }
+
+            if (key === 't') { cycleTheme(); return; }
+            if (key === 's') { document.getElementById('soundBtn').click(); return; }
+            if (key === 'r') { toggleRain(); return; }
+            if (key === 'm') { toggleMusic(); return; }
+            if (key === 'x') { document.getElementById('speedBtn').click(); return; }
+            if (key === 'd') { deployToProd(); return; }
+            if (key === 'c') { openPanel(); return; }
+            if (key === 'a') { showAchievementsGallery(); return; }
+        });
+    }
+
+    // ═══════════════════════════════════════
     // MATRIX RAIN (FIXED visibility)
     // ═══════════════════════════════════════
     var matrixCanvas = document.getElementById('matrixCanvas');
@@ -1772,7 +2510,7 @@
     function toggleRain() {
         state.rain = !state.rain;
         document.getElementById('rainBtn').classList.toggle('active', state.rain);
-        if (state.rain) { matrixCanvas.classList.add('active'); resizeMatrix(); drawMatrix(); }
+        if (state.rain) { matrixCanvas.classList.add('active'); resizeMatrix(); drawMatrix(); unlockAchievement('matrix'); }
         else { matrixCanvas.classList.remove('active'); if (matrixRAF) cancelAnimationFrame(matrixRAF); matrixCtx.clearRect(0, 0, matrixCanvas.width, matrixCanvas.height); }
     }
 
@@ -1791,12 +2529,26 @@
         }
         overlay.innerHTML = '<div class="deploy-success">DEPLOYED!</div>';
         spawnConfetti();
+        launchFireworks();
         await sleep(2500);
         overlay.style.transition = 'opacity 0.5s';
         overlay.style.opacity = '0';
         await sleep(500);
         overlay.remove();
-        showToast('\ud83d\ude80 Successfully shipped to production!');
+
+        state.deployCount++;
+        saveToLocalStorage();
+        unlockAchievement('first-deploy');
+        if (state.deployCount >= 5) unlockAchievement('deploy-5');
+
+        var deployMsgs = [
+            '\ud83d\ude80 Successfully shipped to production!',
+            '\ud83d\ude80 Production is live. No regrets.',
+            '\ud83d\ude80 Deployed! Your users will never know.',
+            '\ud83d\ude80 Ship it! Ship it real good!',
+            '\ud83d\ude80 Production deploy #' + state.deployCount + '. Still standing.',
+        ];
+        showToast(deployMsgs[Math.floor(Math.random()*deployMsgs.length)]);
     }
 
     function spawnConfetti() {
@@ -1845,8 +2597,10 @@
         state.model = document.getElementById('inputModel').value;
         closePanel();
         restartTyping();
-        if (state.zodiac) showToast(zodiacGlyphs[state.zodiac] + ' ' + state.zodiac + ' energy activated!');
+        unlockAchievement('customized');
+        if (state.zodiac) { showToast(zodiacGlyphs[state.zodiac] + ' ' + state.zodiac + ' energy activated!'); unlockAchievement('zodiac'); }
         else showToast('Simulator regenerated!');
+        saveToLocalStorage();
     }
 
     // ═══════════════════════════════════════
@@ -1864,7 +2618,7 @@
     // ═══════════════════════════════════════
     // REVEAL
     // ═══════════════════════════════════════
-    function showReveal() { if (!state.panelOpen) document.getElementById('revealOverlay').classList.add('active'); }
+    function showReveal() { if (!state.panelOpen) { document.getElementById('revealOverlay').classList.add('active'); unlockAchievement('reveal'); } }
     function hideReveal() { document.getElementById('revealOverlay').classList.remove('active'); }
 
     // ═══════════════════════════════════════
@@ -1882,6 +2636,7 @@
         document.body.appendChild(o);
         o.addEventListener('click', function() { o.remove(); });
         setTimeout(function() { if (o.parentNode) o.remove(); }, 4000);
+        unlockAchievement('konami');
     }
 
     // ═══════════════════════════════════════
@@ -1902,48 +2657,84 @@
             e.stopPropagation();
             state.sound = !state.sound;
             e.currentTarget.classList.toggle('active', state.sound);
-            if (state.sound) { if (!audioCtx) initAudio(); if (audioCtx.state === 'suspended') audioCtx.resume(); showToast('Sound ON \ud83d\udd0a'); }
+            if (state.sound) { if (!audioCtx) initAudio(); if (audioCtx.state === 'suspended') audioCtx.resume(); showToast('Sound ON \ud83d\udd0a'); unlockAchievement('sound-on'); }
             else showToast('Sound OFF');
         });
         document.getElementById('rainBtn').addEventListener('click', function(e) { e.stopPropagation(); toggleRain(); });
+        document.getElementById('musicBtn').addEventListener('click', function(e) { e.stopPropagation(); toggleMusic(); });
         document.getElementById('speedBtn').addEventListener('click', function(e) {
             e.stopPropagation();
             state.speed = speeds[(speeds.indexOf(state.speed)+1)%speeds.length];
             e.currentTarget.querySelector('.speed-label').textContent = speedLabels[state.speed];
             showToast('Speed: ' + ({1:'Normal',3:'Fast',10:'LUDICROUS'})[state.speed]);
+            if (state.speed === 10) unlockAchievement('speed-demon');
         });
         document.getElementById('settingsBtn').addEventListener('click', function(e) { e.stopPropagation(); openPanel(); });
         document.getElementById('panelClose').addEventListener('click', closePanel);
         document.getElementById('panelOverlay').addEventListener('click', closePanel);
         document.getElementById('applyBtn').addEventListener('click', applyCustomization);
         document.getElementById('shareBtn').addEventListener('click', function() {
-            navigator.clipboard.writeText(getShareURL()).then(function(){showToast('Share link copied!');}).catch(function(){showToast('Could not copy');});
+            navigator.clipboard.writeText(getShareURL()).then(function(){showToast('Share link copied!'); unlockAchievement('shared');}).catch(function(){showToast('Could not copy');});
         });
         document.getElementById('footerReveal').addEventListener('click', function(e) { e.stopPropagation(); showReveal(); });
         document.getElementById('deployBtn').addEventListener('click', function(e) { e.stopPropagation(); deployToProd(); });
         document.getElementById('revealOverlay').addEventListener('click', function(e) { if (e.target.id === 'revealOverlay') hideReveal(); });
         document.getElementById('revealReset').addEventListener('click', function() { hideReveal(); restartTyping(); });
         document.getElementById('revealShare').addEventListener('click', function() {
-            navigator.clipboard.writeText(getShareURL()).then(function(){showToast('Share link copied!');}).catch(function(){showToast('Could not copy');});
+            navigator.clipboard.writeText(getShareURL()).then(function(){showToast('Share link copied!'); unlockAchievement('shared');}).catch(function(){showToast('Could not copy');});
         });
-        document.addEventListener('keydown', function(e) { checkKonami(e.keyCode); });
+        document.getElementById('trophyCount').addEventListener('click', function(e) { e.stopPropagation(); showAchievementsGallery(); });
+        document.getElementById('shortcutsOverlay').addEventListener('click', function(e) { if (e.target.id === 'shortcutsOverlay') e.target.classList.remove('active'); });
+        document.getElementById('achievementsGallery').addEventListener('click', function(e) { if (e.target.id === 'achievementsGallery') e.target.classList.remove('active'); });
         window.addEventListener('resize', function() { if (state.rain) resizeMatrix(); });
         updateTimestamp();
         setInterval(updateTimestamp, 1000);
+        setInterval(checkTimeAchievements, 60000);
+        setupKeyboardShortcuts();
     }
+
+    // ═══════════════════════════════════════
+    // MORE EASTER EGGS
+    // ═══════════════════════════════════════
+    // Double-click the header title for a secret
+    document.getElementById('headerTitle').addEventListener('dblclick', function() {
+        var messages = [
+            'Hey! Stop poking the title!',
+            'You found a secret! Well, sort of.',
+            'The AI sees all. Even double-clicks.',
+            'Achievement unlocked: Curiosity.',
+            'You\'re persistent. I like that.',
+            'Fun fact: This entire app was built by AI.',
+            'Double-click energy detected.',
+        ];
+        showToast(messages[Math.floor(Math.random()*messages.length)]);
+    });
+
+    // Secret: type "hello" anywhere for a greeting
+    var secretBuffer = '';
+    document.addEventListener('keypress', function(e) {
+        if (e.target.tagName === 'INPUT' || e.target.tagName === 'SELECT') return;
+        secretBuffer += e.key.toLowerCase();
+        if (secretBuffer.length > 20) secretBuffer = secretBuffer.slice(-20);
+        if (secretBuffer.endsWith('hello')) showToast('Hello, ' + sanitize(state.name) + '! Claude says hi back.');
+        if (secretBuffer.endsWith('42')) showToast('The answer to life, the universe, and everything.');
+        if (secretBuffer.endsWith('ship')) showToast('\ud83d\udea2 SHIP IT! SHIP IT NOW!');
+    });
 
     // ═══════════════════════════════════════
     // INIT
     // ═══════════════════════════════════════
     try {
-        loadFromURL();
+        loadFromLocalStorage(); // Load saved settings first
+        loadFromURL();          // URL params override localStorage
         applyTheme(state.theme);
         setupEvents();
+        updateTrophyCount();
+        checkTimeAchievements();
         if (accessibilityActive) document.getElementById('accessBtn').classList.add('active');
         startTyping();
     } catch(e) {
         console.error('Init error:', e);
-        // Fallback: ensure windows are built even if something else failed
         try { startTyping(); } catch(e2) { console.error('Fallback failed:', e2); }
     }
     </script>
