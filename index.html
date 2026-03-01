@@ -953,13 +953,15 @@
             align-items: center;
             z-index: 10000;
             animation: ee-flash 0.15s ease 3;
+            padding: 20px;
+            text-align: center;
         }
         @keyframes ee-flash {
             0%, 100% { background: rgba(0,0,0,0.95); }
             50% { background: rgba(var(--primary-rgb), 0.15); }
         }
         .glitch-text {
-            font-size: 52px;
+            font-size: 42px;
             font-weight: 900;
             color: var(--primary);
             text-shadow: 0 0 40px var(--primary-glow);
@@ -1065,6 +1067,48 @@
         @media (max-width: 420px) {
             .stats-container { grid-template-columns: 1fr; }
             .glitch-text { font-size: 32px; }
+        }
+
+        /* ═══════════════════════════════════════
+           EASTER EGG - SCREEN SHAKE
+           ═══════════════════════════════════════ */
+        @keyframes screen-shake {
+            0%, 100% { transform: translate(0); }
+            10% { transform: translate(-8px, 4px) rotate(-1deg); }
+            20% { transform: translate(6px, -6px) rotate(1deg); }
+            30% { transform: translate(-4px, 8px) rotate(-0.5deg); }
+            40% { transform: translate(8px, -4px) rotate(0.5deg); }
+            50% { transform: translate(-6px, 2px) rotate(-1deg); }
+            60% { transform: translate(4px, -8px) rotate(0.5deg); }
+            70% { transform: translate(-8px, 6px) rotate(-0.5deg); }
+            80% { transform: translate(6px, 4px) rotate(1deg); }
+            90% { transform: translate(-4px, -6px) rotate(-0.5deg); }
+        }
+        .shake-active .container {
+            animation: screen-shake 0.6s ease-in-out;
+        }
+        @keyframes overclock-pulse {
+            0%, 100% { box-shadow: 0 0 0 rgba(239, 68, 68, 0); }
+            50% { box-shadow: 0 0 40px rgba(239, 68, 68, 0.4), inset 0 0 30px rgba(239, 68, 68, 0.1); }
+        }
+        .overclocked .container {
+            animation: overclock-pulse 0.5s ease-in-out 3;
+        }
+        .overclocked .cpu-bar::after {
+            width: 100% !important;
+            background: #ef4444 !important;
+            box-shadow: 0 0 15px rgba(239, 68, 68, 0.8) !important;
+            animation: none !important;
+        }
+        @keyframes invert-flash {
+            0% { filter: invert(0) hue-rotate(0deg); }
+            25% { filter: invert(1) hue-rotate(180deg); }
+            50% { filter: invert(0) hue-rotate(90deg); }
+            75% { filter: invert(1) hue-rotate(270deg); }
+            100% { filter: invert(0) hue-rotate(0deg); }
+        }
+        .color-trip .container {
+            animation: invert-flash 2s ease-in-out;
         }
 
         /* ═══════════════════════════════════════
@@ -2782,23 +2826,136 @@
     }
 
     // ═══════════════════════════════════════
-    // MORE EASTER EGGS
+    // EASTER EGGS (Mobile-Friendly!)
     // ═══════════════════════════════════════
-    // Double-click the header title for a secret
-    document.getElementById('headerTitle').addEventListener('dblclick', function() {
-        var messages = [
-            'Hey! Stop poking the title!',
-            'You found a secret! Well, sort of.',
-            'The AI sees all. Even double-clicks.',
-            'Achievement unlocked: Curiosity.',
-            'You\'re persistent. I like that.',
-            'Fun fact: This entire app was built by AI.',
-            'Double-click energy detected.',
+
+    // 1. LONG-PRESS DEPLOY BUTTON — "Self-Destruct" mode
+    var deployLongPress = null;
+    var deployBtn = document.getElementById('deployBtn');
+    function startDeployLongPress(e) {
+        deployLongPress = setTimeout(function() {
+            deployLongPress = null;
+            triggerSelfDestruct();
+        }, 1500);
+    }
+    function cancelDeployLongPress() { if (deployLongPress) { clearTimeout(deployLongPress); deployLongPress = null; } }
+    deployBtn.addEventListener('touchstart', startDeployLongPress, { passive: true });
+    deployBtn.addEventListener('touchend', cancelDeployLongPress);
+    deployBtn.addEventListener('touchmove', cancelDeployLongPress);
+    deployBtn.addEventListener('mousedown', startDeployLongPress);
+    deployBtn.addEventListener('mouseup', cancelDeployLongPress);
+    deployBtn.addEventListener('mouseleave', cancelDeployLongPress);
+
+    function triggerSelfDestruct() {
+        var o = document.createElement('div');
+        o.className = 'easter-egg-overlay';
+        o.innerHTML = '<div class="glitch-text">SELF DESTRUCT</div><div class="ee-sub">Just kidding. But hold that button longer next time...</div><div style="font-size:60px;margin-top:20px">&#128163;</div>';
+        document.body.appendChild(o);
+        spawnConfetti();
+        document.body.classList.add('shake-active');
+        setTimeout(function() { document.body.classList.remove('shake-active'); }, 600);
+        o.addEventListener('click', function() { o.remove(); });
+        setTimeout(function() { if (o.parentNode) o.remove(); }, 4000);
+    }
+
+    // 2. SHAKE PHONE — Earthquake effect (Device Motion API)
+    var lastShakeTime = 0;
+    var shakeThreshold = 25;
+    var lastAccel = { x: 0, y: 0, z: 0 };
+    if (window.DeviceMotionEvent) {
+        window.addEventListener('devicemotion', function(e) {
+            var a = e.accelerationIncludingGravity;
+            if (!a) return;
+            var dx = Math.abs(a.x - lastAccel.x);
+            var dy = Math.abs(a.y - lastAccel.y);
+            var dz = Math.abs(a.z - lastAccel.z);
+            lastAccel = { x: a.x, y: a.y, z: a.z };
+            if (dx + dy + dz > shakeThreshold) {
+                var now = Date.now();
+                if (now - lastShakeTime > 3000) {
+                    lastShakeTime = now;
+                    triggerShakeEgg();
+                }
+            }
+        });
+    }
+
+    function triggerShakeEgg() {
+        document.body.classList.add('shake-active');
+        setTimeout(function() { document.body.classList.remove('shake-active'); }, 600);
+        var msgs = [
+            'Whoa! Earthquake detected!',
+            'Stop shaking me! I\'m trying to code!',
+            'You just caused a production outage.',
+            'Shake it off! (Taylor Swift voice)',
+            'ERROR: Gravity exception in main thread.',
+            'Fun fact: shaking doesn\'t make code compile faster.',
         ];
-        showToast(messages[Math.floor(Math.random()*messages.length)]);
+        showToast(msgs[Math.floor(Math.random() * msgs.length)]);
+    }
+
+    // 3. TAP CPU BAR 5x FAST — "Overclock" mode
+    var cpuTapCount = 0;
+    var cpuTapTimer = null;
+    document.querySelector('.cpu-indicator').addEventListener('click', function() {
+        cpuTapCount++;
+        clearTimeout(cpuTapTimer);
+        cpuTapTimer = setTimeout(function() { cpuTapCount = 0; }, 2000);
+        if (cpuTapCount >= 5) {
+            cpuTapCount = 0;
+            triggerOverclock();
+        }
     });
 
-    // Secret: type "hello" anywhere for a greeting
+    function triggerOverclock() {
+        document.body.classList.add('overclocked');
+        var o = document.createElement('div');
+        o.className = 'easter-egg-overlay';
+        o.innerHTML = '<div class="glitch-text">OVERCLOCKED</div><div class="ee-sub">Claude is now running at 420% capacity</div><div style="font-size:60px;margin-top:20px">&#9889;</div>';
+        document.body.appendChild(o);
+        o.addEventListener('click', function() { o.remove(); });
+        setTimeout(function() { if (o.parentNode) o.remove(); }, 3500);
+        setTimeout(function() { document.body.classList.remove('overclocked'); }, 5000);
+        showToast('CPU OVERCLOCKED. Thermal throttle in 3... 2... just kidding.');
+    }
+
+    // 4. TAP HEADER TITLE 3x — Color trip mode
+    var titleTapCount = 0;
+    var titleTapTimer = null;
+    document.getElementById('headerTitle').addEventListener('click', function() {
+        titleTapCount++;
+        clearTimeout(titleTapTimer);
+        titleTapTimer = setTimeout(function() { titleTapCount = 0; }, 1500);
+        if (titleTapCount >= 3) {
+            titleTapCount = 0;
+            triggerColorTrip();
+        }
+    });
+
+    function triggerColorTrip() {
+        document.body.classList.add('color-trip');
+        showToast('Color trip mode activated!');
+        setTimeout(function() { document.body.classList.remove('color-trip'); }, 2000);
+    }
+
+    // 5. TAP FOOTER TEXT 3x — The real truth
+    var footerTapCount = 0;
+    var footerTapTimer = null;
+    document.getElementById('footerReveal').addEventListener('click', function() {
+        footerTapCount++;
+        clearTimeout(footerTapTimer);
+        footerTapTimer = setTimeout(function() { footerTapCount = 0; }, 2000);
+        if (footerTapCount >= 3 && footerTapCount < 4) {
+            var o = document.createElement('div');
+            o.className = 'easter-egg-overlay';
+            o.innerHTML = '<div class="glitch-text">NICE TRY</div><div class="ee-sub">You tapped the truth 3 times.<br>The truth tapped back.</div><div style="font-size:60px;margin-top:20px">&#128064;</div>';
+            document.body.appendChild(o);
+            o.addEventListener('click', function() { o.remove(); });
+            setTimeout(function() { if (o.parentNode) o.remove(); }, 4000);
+        }
+    });
+
+    // 6. Desktop keyboard secrets still work too
     var secretBuffer = '';
     document.addEventListener('keypress', function(e) {
         if (e.target.tagName === 'INPUT' || e.target.tagName === 'SELECT') return;
@@ -2806,7 +2963,7 @@
         if (secretBuffer.length > 20) secretBuffer = secretBuffer.slice(-20);
         if (secretBuffer.endsWith('hello')) showToast('Hello, ' + sanitize(state.name) + '! Claude says hi back.');
         if (secretBuffer.endsWith('42')) showToast('The answer to life, the universe, and everything.');
-        if (secretBuffer.endsWith('ship')) showToast('\ud83d\udea2 SHIP IT! SHIP IT NOW!');
+        if (secretBuffer.endsWith('ship')) { showToast('\ud83d\udea2 SHIP IT! SHIP IT NOW!'); spawnConfetti(); }
     });
 
     // ═══════════════════════════════════════
