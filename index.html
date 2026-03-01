@@ -989,7 +989,8 @@
         @media (max-width: 1024px) {
             .stats-container { grid-template-columns: repeat(2, 1fr); }
             .header-title { font-size: 11px; letter-spacing: 1px; }
-            .cpu-indicator { display: none; }
+            .cpu-indicator { font-size: 10px; }
+            .cpu-bar { width: 35px; }
         }
 
         /* ═══════════════════════════════════════
@@ -997,6 +998,12 @@
            ═══════════════════════════════════════ */
         @media (max-width: 768px) {
             body { overflow-y: auto; }
+
+            /* Calm down animations on mobile */
+            .container::before { animation: none; opacity: 0.5; }
+            .zodiac-glyph { animation: none; }
+            .deploy-btn { animation: none; }
+            .cpu-bar::after { animation: cpu-pulse 3s ease-in-out infinite; }
 
             .container {
                 padding: 10px;
@@ -2808,8 +2815,16 @@
         document.getElementById('shareBtn').addEventListener('click', function() {
             navigator.clipboard.writeText(getShareURL()).then(function(){showToast('Share link copied!'); unlockAchievement('shared');}).catch(function(){showToast('Could not copy');});
         });
-        document.getElementById('footerReveal').addEventListener('click', function(e) { e.stopPropagation(); showReveal(); });
-        document.getElementById('deployBtn').addEventListener('click', function(e) { e.stopPropagation(); deployToProd(); });
+        // Footer: single tap reveals, triple tap triggers easter egg
+        var footerTapTimer2 = null; var footerClicks = 0;
+        document.getElementById('footerReveal').addEventListener('click', function(e) {
+            e.stopPropagation();
+            footerClicks++;
+            clearTimeout(footerTapTimer2);
+            if (footerClicks >= 3) { footerClicks = 0; triggerFooterEgg(); return; }
+            footerTapTimer2 = setTimeout(function() { if (footerClicks < 3) showReveal(); footerClicks = 0; }, 400);
+        });
+        document.getElementById('deployBtn').addEventListener('click', function(e) { e.stopPropagation(); if (!deployLongPressTriggered) deployToProd(); deployLongPressTriggered = false; });
         document.getElementById('revealOverlay').addEventListener('click', function(e) { if (e.target.id === 'revealOverlay') hideReveal(); });
         document.getElementById('revealReset').addEventListener('click', function() { hideReveal(); restartTyping(); });
         document.getElementById('revealShare').addEventListener('click', function() {
@@ -2831,10 +2846,13 @@
 
     // 1. LONG-PRESS DEPLOY BUTTON — "Self-Destruct" mode
     var deployLongPress = null;
+    var deployLongPressTriggered = false;
     var deployBtn = document.getElementById('deployBtn');
     function startDeployLongPress(e) {
+        deployLongPressTriggered = false;
         deployLongPress = setTimeout(function() {
             deployLongPress = null;
+            deployLongPressTriggered = true;
             triggerSelfDestruct();
         }, 1500);
     }
@@ -2862,7 +2880,11 @@
     var lastShakeTime = 0;
     var shakeThreshold = 25;
     var lastAccel = { x: 0, y: 0, z: 0 };
-    if (window.DeviceMotionEvent) {
+    var shakeListenerAdded = false;
+
+    function addShakeListener() {
+        if (shakeListenerAdded) return;
+        shakeListenerAdded = true;
         window.addEventListener('devicemotion', function(e) {
             var a = e.accelerationIncludingGravity;
             if (!a) return;
@@ -2878,6 +2900,21 @@
                 }
             }
         });
+    }
+
+    // iOS 13+ requires permission request; other platforms just work
+    if (window.DeviceMotionEvent) {
+        if (typeof DeviceMotionEvent.requestPermission === 'function') {
+            // iOS: request on first user interaction
+            document.addEventListener('touchstart', function iosMotionReq() {
+                DeviceMotionEvent.requestPermission().then(function(state) {
+                    if (state === 'granted') addShakeListener();
+                }).catch(function() {});
+                document.removeEventListener('touchstart', iosMotionReq);
+            }, { once: true });
+        } else {
+            addShakeListener();
+        }
     }
 
     function triggerShakeEgg() {
@@ -2938,22 +2975,15 @@
         setTimeout(function() { document.body.classList.remove('color-trip'); }, 2000);
     }
 
-    // 5. TAP FOOTER TEXT 3x — The real truth
-    var footerTapCount = 0;
-    var footerTapTimer = null;
-    document.getElementById('footerReveal').addEventListener('click', function() {
-        footerTapCount++;
-        clearTimeout(footerTapTimer);
-        footerTapTimer = setTimeout(function() { footerTapCount = 0; }, 2000);
-        if (footerTapCount >= 3 && footerTapCount < 4) {
-            var o = document.createElement('div');
-            o.className = 'easter-egg-overlay';
-            o.innerHTML = '<div class="glitch-text">NICE TRY</div><div class="ee-sub">You tapped the truth 3 times.<br>The truth tapped back.</div><div style="font-size:60px;margin-top:20px">&#128064;</div>';
-            document.body.appendChild(o);
-            o.addEventListener('click', function() { o.remove(); });
-            setTimeout(function() { if (o.parentNode) o.remove(); }, 4000);
-        }
-    });
+    // 5. FOOTER 3x TAP — triggered from the event handler in setupEvents
+    function triggerFooterEgg() {
+        var o = document.createElement('div');
+        o.className = 'easter-egg-overlay';
+        o.innerHTML = '<div class="glitch-text">NICE TRY</div><div class="ee-sub">You tapped the truth 3 times.<br>The truth tapped back.</div><div style="font-size:60px;margin-top:20px">&#128064;</div>';
+        document.body.appendChild(o);
+        o.addEventListener('click', function() { o.remove(); });
+        setTimeout(function() { if (o.parentNode) o.remove(); }, 4000);
+    }
 
     // 6. Desktop keyboard secrets still work too
     var secretBuffer = '';
