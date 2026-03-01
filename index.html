@@ -2481,133 +2481,98 @@
         // Master gain with fade-in
         musicMasterGain = ctx.createGain();
         musicMasterGain.gain.setValueAtTime(0, now);
-        musicMasterGain.gain.linearRampToValueAtTime(0.35, now + 2);
+        musicMasterGain.gain.linearRampToValueAtTime(0.45, now + 2);
         musicMasterGain.connect(ctx.destination);
 
-        // ── WARM PAD (lush chord) ──
+        // ── Close Encounters 5-note motif: D5, E5, C5, C4, G4 ──
+        var motifFreqs = [587.33, 659.25, 523.25, 261.63, 392.00];
+        var noteDuration = 0.7;   // each note length in seconds
+        var pauseAfter = 2.5;     // pause after the 5 notes before repeating
+        var motifCycleTime = (motifFreqs.length * noteDuration + pauseAfter) * 1000;
+
+        // Play one full motif statement
+        function playMotif() {
+            if (!musicPlaying) return;
+            var t = ctx.currentTime;
+            motifFreqs.forEach(function(freq, i) {
+                var start = t + i * noteDuration;
+
+                // Primary tone — warm sine
+                var osc1 = ctx.createOscillator();
+                osc1.type = 'sine';
+                osc1.frequency.value = freq;
+                var g1 = ctx.createGain();
+                g1.gain.setValueAtTime(0.001, start);
+                g1.gain.exponentialRampToValueAtTime(0.25, start + 0.08);
+                g1.gain.setValueAtTime(0.25, start + noteDuration * 0.5);
+                g1.gain.exponentialRampToValueAtTime(0.001, start + noteDuration + 0.4);
+                osc1.connect(g1);
+                g1.connect(musicMasterGain);
+                osc1.start(start);
+                osc1.stop(start + noteDuration + 0.5);
+
+                // Octave-up shimmer — triangle, quieter
+                var osc2 = ctx.createOscillator();
+                osc2.type = 'triangle';
+                osc2.frequency.value = freq * 2;
+                var g2 = ctx.createGain();
+                g2.gain.setValueAtTime(0.001, start);
+                g2.gain.exponentialRampToValueAtTime(0.06, start + 0.1);
+                g2.gain.exponentialRampToValueAtTime(0.001, start + noteDuration + 0.5);
+                osc2.connect(g2);
+                g2.connect(musicMasterGain);
+                osc2.start(start);
+                osc2.stop(start + noteDuration + 0.6);
+
+                // Sub octave — for depth on the lower notes (C4, G4)
+                if (i >= 3) {
+                    var osc3 = ctx.createOscillator();
+                    osc3.type = 'sine';
+                    osc3.frequency.value = freq * 0.5;
+                    var g3 = ctx.createGain();
+                    g3.gain.setValueAtTime(0.001, start);
+                    g3.gain.exponentialRampToValueAtTime(0.1, start + 0.1);
+                    g3.gain.exponentialRampToValueAtTime(0.001, start + noteDuration + 0.6);
+                    osc3.connect(g3);
+                    g3.connect(musicMasterGain);
+                    osc3.start(start);
+                    osc3.stop(start + noteDuration + 0.7);
+                }
+            });
+        }
+
+        // ── Ambient drone pad — evolving C major bed ──
         var padGain = ctx.createGain();
-        padGain.gain.value = 0.08;
+        padGain.gain.value = 0.04;
         padGain.connect(musicMasterGain);
-        // Am7 chord: A2, C3, E3, G3
-        var padNotes = [110, 130.81, 164.81, 196];
+        var padNotes = [130.81, 196, 261.63, 329.63]; // C3, G3, C4, E4
         padNotes.forEach(function(freq, i) {
             var osc = ctx.createOscillator();
-            osc.type = i < 2 ? 'sawtooth' : 'triangle';
+            osc.type = 'sine';
             osc.frequency.value = freq;
+            // Gentle vibrato
+            var lfo = ctx.createOscillator();
+            lfo.frequency.value = 0.08 + i * 0.03;
+            var lfoGain = ctx.createGain();
+            lfoGain.gain.value = 1.5;
+            lfo.connect(lfoGain);
+            lfoGain.connect(osc.frequency);
+            lfo.start(now);
             // Warm filter
             var filter = ctx.createBiquadFilter();
             filter.type = 'lowpass';
-            filter.frequency.value = 600;
-            filter.Q.value = 2;
-            // Slow filter sweep
-            var lfo = ctx.createOscillator();
-            lfo.frequency.value = 0.15 + i * 0.05;
-            var lfoGain = ctx.createGain();
-            lfoGain.gain.value = 200;
-            lfo.connect(lfoGain);
-            lfoGain.connect(filter.frequency);
-            lfo.start(now);
+            filter.frequency.value = 400 + i * 80;
+            filter.Q.value = 1;
             osc.connect(filter);
             filter.connect(padGain);
             osc.start(now);
         });
 
-        // ── BASS LINE ──
-        var bassGain = ctx.createGain();
-        bassGain.gain.value = 0.12;
-        bassGain.connect(musicMasterGain);
-        var bassFilter = ctx.createBiquadFilter();
-        bassFilter.type = 'lowpass';
-        bassFilter.frequency.value = 300;
-        bassFilter.connect(bassGain);
-        // Bass pattern: A1, A1, C2, E2 (repeating)
-        var bassPattern = [55, 55, 65.41, 82.41];
-        var bassIdx = 0;
-        var bassOsc = ctx.createOscillator();
-        bassOsc.type = 'sawtooth';
-        bassOsc.frequency.value = bassPattern[0];
-        bassOsc.connect(bassFilter);
-        bassOsc.start(now);
-        var bassInterval = setInterval(function() {
-            if (!musicPlaying) return;
-            bassIdx = (bassIdx + 1) % bassPattern.length;
-            bassOsc.frequency.setTargetAtTime(bassPattern[bassIdx], ctx.currentTime, 0.05);
-        }, 500); // 120 BPM eighth notes
-        musicTimers.push(bassInterval);
-
-        // ── ARPEGGIO ──
-        var arpGain = ctx.createGain();
-        arpGain.gain.value = 0.06;
-        arpGain.connect(musicMasterGain);
-        // Am pentatonic arp: A4, C5, E5, G5, A5
-        var arpNotes = [440, 523.25, 659.25, 783.99, 880];
-        var arpIdx = 0;
-        var arpOsc = ctx.createOscillator();
-        arpOsc.type = 'square';
-        var arpFilter = ctx.createBiquadFilter();
-        arpFilter.type = 'lowpass';
-        arpFilter.frequency.value = 2000;
-        arpOsc.connect(arpFilter);
-        arpFilter.connect(arpGain);
-        arpOsc.start(now);
-        // Arp envelope
-        var arpEnv = ctx.createGain();
-        arpEnv.gain.value = 1;
-        arpFilter.disconnect();
-        arpFilter.connect(arpEnv);
-        arpEnv.connect(arpGain);
-        var arpInterval = setInterval(function() {
-            if (!musicPlaying) return;
-            arpIdx = (arpIdx + 1) % arpNotes.length;
-            arpOsc.frequency.setValueAtTime(arpNotes[arpIdx], ctx.currentTime);
-            arpEnv.gain.setValueAtTime(1, ctx.currentTime);
-            arpEnv.gain.exponentialRampToValueAtTime(0.3, ctx.currentTime + 0.15);
-        }, 250); // 16th notes at 120 BPM
-        musicTimers.push(arpInterval);
-
-        // ── KICK DRUM (every beat) ──
-        function playKick() {
-            if (!musicPlaying) return;
-            var kickOsc = ctx.createOscillator();
-            var kickGain = ctx.createGain();
-            kickOsc.frequency.setValueAtTime(150, ctx.currentTime);
-            kickOsc.frequency.exponentialRampToValueAtTime(30, ctx.currentTime + 0.12);
-            kickGain.gain.setValueAtTime(0.2, ctx.currentTime);
-            kickGain.gain.exponentialRampToValueAtTime(0.001, ctx.currentTime + 0.15);
-            kickOsc.connect(kickGain);
-            kickGain.connect(musicMasterGain);
-            kickOsc.start(ctx.currentTime);
-            kickOsc.stop(ctx.currentTime + 0.2);
-        }
-        var kickInterval = setInterval(function() { if (musicPlaying) playKick(); }, 500);
-        musicTimers.push(kickInterval);
-        playKick(); // First kick immediately
-
-        // ── HI-HAT (offbeat) ──
-        function playHat() {
-            if (!musicPlaying) return;
-            var bufLen = Math.floor(ctx.sampleRate * 0.03);
-            var buf = ctx.createBuffer(1, bufLen, ctx.sampleRate);
-            var ch = buf.getChannelData(0);
-            for (var i = 0; i < bufLen; i++) ch[i] = (Math.random() * 2 - 1) * Math.exp(-i / (ctx.sampleRate * 0.008));
-            var src = ctx.createBufferSource();
-            src.buffer = buf;
-            var hatGain = ctx.createGain();
-            hatGain.gain.value = 0.04;
-            var hatFilter = ctx.createBiquadFilter();
-            hatFilter.type = 'highpass';
-            hatFilter.frequency.value = 7000;
-            src.connect(hatFilter);
-            hatFilter.connect(hatGain);
-            hatGain.connect(musicMasterGain);
-            src.start(ctx.currentTime);
-        }
-        setTimeout(function() {
-            var hatInterval = setInterval(function() { if (musicPlaying) playHat(); }, 250);
-            musicTimers.push(hatInterval);
-        }, 125); // Offset for offbeat feel
-
+        // Play motif immediately and loop
         musicPlaying = true;
+        playMotif();
+        var motifInterval = setInterval(function() { if (musicPlaying) playMotif(); }, motifCycleTime);
+        musicTimers.push(motifInterval);
 
         // Visualizer animation synced to beat
         var bars = document.querySelectorAll('.music-bar');
@@ -2644,7 +2609,7 @@
     function toggleMusic() {
         state.music = !state.music;
         document.getElementById('musicBtn').classList.toggle('active', state.music);
-        if (state.music) { startMusic(); showToast('Synthwave ON \ud83c\udfb5'); unlockAchievement('musician'); }
+        if (state.music) { startMusic(); showToast('Close Encounters ON \ud83c\udfb5'); unlockAchievement('musician'); }
         else { stopMusic(); showToast('Music OFF'); }
     }
 
