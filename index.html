@@ -406,7 +406,7 @@
         }
         .mobile-tab {
             flex: 1;
-            padding: 8px 4px;
+            padding: 10px 4px;
             border: 1px solid var(--primary-border);
             border-radius: 6px;
             background: rgba(var(--primary-rgb), 0.05);
@@ -997,22 +997,21 @@
            RESPONSIVE — MOBILE (Complete Rewrite)
            ═══════════════════════════════════════ */
         @media (max-width: 768px) {
-            /* Let the page scroll vertically */
-            body { overflow-y: auto; }
+            /* Body: allow scroll, auto height */
+            body { overflow-y: auto; height: auto; }
 
-            /* Kill ALL constant animations — clean, stable screen */
-            .container::before { animation: none; opacity: 0.3; }
+            /* Kill ALL constant animations */
+            .container::before { display: none; }
             .zodiac-glyph { animation: none; }
             .deploy-btn { animation: none; }
             .cpu-bar::after { animation: none; width: 72%; }
 
-            /* SOLID background so matrix rain doesn't bleed through */
+            /* Container: solid bg, no forced min-height */
             .container {
-                padding: 8px;
+                padding: 6px;
                 gap: 6px;
                 height: auto;
-                min-height: 100vh;
-                min-height: 100dvh;
+                min-height: 0;
                 background: var(--bg);
             }
 
@@ -1021,7 +1020,7 @@
                 flex-wrap: wrap;
                 padding: 8px 10px;
                 gap: 6px;
-                background: rgba(10, 10, 15, 0.95);
+                background: var(--bg-panel);
             }
             .header-title {
                 font-size: 9px;
@@ -1046,7 +1045,7 @@
             .cpu-bar { width: 30px; }
             .music-visualizer { display: none; }
 
-            /* Tab bar to switch windows */
+            /* Tab bar */
             .mobile-tabs { display: flex; }
 
             /* Horizontally scrolling windows */
@@ -1060,18 +1059,21 @@
                 flex: none;
             }
             .window {
+                width: 100%;
                 min-width: 100%;
                 height: 50vh;
                 flex-shrink: 0;
                 scroll-snap-align: start;
                 border-radius: 6px;
-                background: rgba(10, 10, 15, 0.98);
+                background: var(--bg);
+                backdrop-filter: none;
             }
+            .window:hover { box-shadow: none; }
             .window.maximized { position: relative; inset: auto; }
 
             /* Compact stats */
             .stats-container { grid-template-columns: 1fr 1fr; gap: 6px; }
-            .stat-box { padding: 8px; background: rgba(10, 10, 15, 0.95); }
+            .stat-box { padding: 8px; background: var(--bg-panel); }
             .stat-label { font-size: 9px; }
             .stat-value { font-size: 11px; }
             .stat-bar { height: 4px; margin-bottom: 4px; }
@@ -1090,19 +1092,22 @@
             .footer { font-size: 10px; padding: 6px; flex-wrap: wrap; justify-content: center; }
             .deploy-overlay { font-size: 50px; }
 
-            /* Achievement popup — drop from top, full width */
+            /* Achievement popup — drop from top */
             .achievement-popup {
-                top: 10px;
-                right: 10px;
-                left: 10px;
+                top: 10px; right: 10px; left: 10px;
                 max-width: none;
                 transform: translateY(-200px);
             }
             .achievement-popup.show { transform: translateY(0); }
             .shortcuts-overlay .shortcuts-panel { padding: 20px; }
 
-            /* Matrix rain — hidden on mobile since bg is solid */
+            /* Matrix rain — hidden on mobile */
             #matrixCanvas { display: none; }
+
+            /* Terminal tweaks — keep 16px to prevent iOS auto-zoom */
+            .terminal-input { font-size: 16px; min-height: 38px; padding: 6px 0; }
+            .terminal-send { padding: 6px 10px; font-size: 11px; }
+            .terminal-input-wrapper { padding: 10px; }
         }
 
         @media (max-width: 420px) {
